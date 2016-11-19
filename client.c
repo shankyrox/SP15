@@ -81,11 +81,13 @@ int main(int argc, char *argv[])
     list.head=NULL;
     list.count=0;
 
-    int i =0;
+    int i =0, *thread_id;
     /*Creat thread*/
     for(i=0; i < MAX_NUM_WORKER_CLIENT; i++)
     {    
-        pthread_create(&worker[i], 0,  worker_thread_fun, &i);
+		thread_id = MALLOC(sizeof(int));
+		*thread_id = i;
+        pthread_create(&worker[i], NULL,  worker_thread_fun, thread_id);
     }
 
 
@@ -308,6 +310,7 @@ void event_handler(Message *data)
 void *worker_thread_fun(void *thread_id)
 {
     int mythread_id = *(int *)thread_id; 
+	free (thread_id);
     Message *data;
 
 
