@@ -85,7 +85,6 @@ main (int argc, char *argv[])
     /* Buffer where events are returned */
     events = calloc (MAX_EVENTS, sizeof (event));
 
-    
     printf("\nServer initialized!! Waiting for client connections . . \n");
     /* The event loop */
     
@@ -119,7 +118,7 @@ main (int argc, char *argv[])
         for (i = 0; i < num_fd_ready; i++)
         {
 
-            //  PRINT("\nNew Event recieved events[%d].event = %d \n",i, events[i].events);  
+            //printf("\nNew Event recieved events[%d].data.fd = %d, %d \n",i, events[i].data.fd, sfd);  
 
             if (sfd == events[i].data.fd)
             {
@@ -150,7 +149,6 @@ main (int argc, char *argv[])
                    and won't get a notification again for the same
                    data. */
                 int done = 0;
-
                 /*If the issue is no the server socket then just exti*/
                 if((events[i].events & EPOLLERR) || 
                         (events[i].events & EPOLLHUP)) 
@@ -162,7 +160,7 @@ main (int argc, char *argv[])
                 {
                     while (1)
                     {
-                        if(!(process_function(&done, events[i].events, events[i].data.fd)))
+                        if(process_function(&done, events[i].events, events[i].data.fd) == SUCCESS)
                         {
                             break;
                         }
@@ -275,7 +273,7 @@ int process_function(int *done, int evt, int fd)
 			/* End of file. The remote has closed the
 			   connection. */
 			*done = 1;
-			return FAILURE; 
+			return SUCCESS; 
 		}
 		buf[count] = '\0';
 		
@@ -300,8 +298,7 @@ int process_function(int *done, int evt, int fd)
     }
     else if (evt & EPOLLOUT)
     {
-
-        
+		printf("evt is epollout");
     }
 
    return SUCCESS;

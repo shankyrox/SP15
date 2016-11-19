@@ -1,7 +1,4 @@
-#include <jansson.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "common.h"
 
 unsigned char * serialize_int(unsigned char *buffer, int value)

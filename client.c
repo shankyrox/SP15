@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
                 
                 while (1)
 				{
-					if(!(process_function(&done, events[i].events, events[i].data.fd)))
+					if(process_function(&done, events[i].events, events[i].data.fd) == SUCCESS)
 					{
 						break;
 					}
@@ -199,7 +199,7 @@ int process_function(int *done, int evt, int fd)
 			/* End of file. The remote has closed the
 			   connection. */
 			*done = 1;
-			return FAILURE; 
+			return SUCCESS; 
 		}
 		buf[count] = '\0';
 		
@@ -207,6 +207,7 @@ int process_function(int *done, int evt, int fd)
 		Message msg_buff = {0};
 
 		parseJson(buf, &msg_buff);
+    	//Verify the data here
 		//msg_buff.client_id = fd;
 	 
 	   /**/ 
@@ -224,14 +225,12 @@ int process_function(int *done, int evt, int fd)
 
         
     }
-
    return SUCCESS;
 }
 
 /* Client */
 void event_handler(Message *data)
 {
-    //Verify the data here
     PRINT("\nevent_handler event = %d\n", data->event);
     
     switch(data->event)
@@ -254,8 +253,7 @@ void event_handler(Message *data)
         default : 
              PRINT("\nNot a valid Event %d\n", data->event);
         break;
- }
-
+ 	}
 }
 
 void *worker_thread_fun(void *thread_id)

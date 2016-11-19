@@ -27,9 +27,9 @@
 
 #define BUFFSIZE 10000// max number of bytes we can get at once
 
-#ifdef DEBUG_FLAG
+//#ifdef DEBUG_FLAG
 #define PRINT printf
-#endif
+//#endif
 
 static inline void *
 mem_alloc(char *file, int line, int size){
