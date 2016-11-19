@@ -17,7 +17,7 @@ int efd;
 List list;
 
 int process_function(int *done, int event, int fd);
-void worker_thread_fun(void *data);
+void *worker_thread_fun(void *thread_id);
 
 char* selectGroup(char *msg)
 {
@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
 
     int i =0;
     /*Creat thread*/
-    for(i=0; i< MAX_NUM_WORKER_CLIENT; i++)
+    for(i=0; i < MAX_NUM_WORKER_CLIENT; i++)
     {    
-        pthread_create(&worker[i], 0,  worker_thread_fun, (void*)(i+1));
+        pthread_create(&worker[i], 0,  worker_thread_fun, &i);
     }
 
 
@@ -305,9 +305,9 @@ void event_handler(Message *data)
 
 }
 
-void worker_thread_fun(void *id)
+void *worker_thread_fun(void *thread_id)
 {
-    int mythread_id = *(int *)id; 
+    int mythread_id = *(int *)thread_id; 
     Message *data;
 
 
