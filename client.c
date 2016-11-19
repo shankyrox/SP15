@@ -134,10 +134,7 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
-     if (send(sockfd, "Hello Server", 14, 0) == -1)
-        printf("\nMain thread:  Sending Hello to Server ");
-
-  while (SUCCESS)
+  while (1)
     {
         int num_fd_ready =0, i=0, done =0;
 
@@ -160,112 +157,66 @@ int main(int argc, char *argv[])
                    exit(EXIT_FAILURE); 
                 }
                 
-                 while (SUCCESS)
-                    {
-                        if(!(process_function(&done, events[i].events, events[i].data.fd)))
-                        {
-                            break;
-                        }
-                    } //While
-                    if(done)
+                while (1)
+				{
+					if(!(process_function(&done, events[i].events, events[i].data.fd)))
+					{
+						break;
+					}
+				} //While
+				if(done)
                    exit(EXIT_FAILURE); 
-                        
         }
     }
 
-#if 0
-    memset(buf, 0x00, strlen(buf));
-    printf("client: blocked on recv . \n");
-    if ((numbytes = recv(sockfd, buf, BUFFSIZE-1, 0)) == -1) {
-        perror("recv");
-        exit(EXIT_FAILURE);
-    }
-
-    buf[numbytes] = '\0';
-
-    groupid = selectGroup(buf);
-
-    memset(buf, 0x00, strlen(buf));
-    sprintf(buf,groupid);
-    
-    send(sockfd, buf, sizeof(buf), 0);
-    //send(sockfd, "5", 2, 0);
-    printf("\n\nclient: wanted to join group '%s'\n",buf);
-
-    memset(buf, 0x00, strlen(buf));
-    sprintf(buf,"Hello!");
-    while(1)
-    {
-        if (send(sockfd, buf, strlen(buf), 0) == -1)
-        {
-            //Send failed
-            perror("send");
-            exit(EXIT_FAILURE);
-        }
-
-        printf("\nMsg sent from client: %s\n", buf);
-        
-        /*Just for test*/
-        sleep(5);
-    }
-#endif
     close(sockfd);
 
     return 0;
 }
 
-
-
-
-
 int process_function(int *done, int evt, int fd)
 {
     char buf[BUFFSIZE];
     ssize_t count;
-    memset(buf, 0x00,  strlen(buf));
-                       
+
     if(evt & EPOLLIN)
     {
-    count = read (fd, buf, sizeof buf);
-    if (count == -1)
-    {
-        /* If errno == EAGAIN, that means we have read all
-           data. So go back to the main loop. */
-        if (errno != EAGAIN)
-        {
-            perror ("read");
-            *done = 1;
-        }
-       // printf("\nRead EAGAIN, Just Break, events[%d].data.fd = %d \n", i, events[i].data.fd);
-       return FAILURE; 
-    }
-    else if (count == 0)
-    {
-        /* End of file. The remote has closed the
-           connection. */
-        *done = 1;
-        return FAILURE; 
-    }
-    buf[count] = '\0';
-    
-    /*Deserialize the buf and put it into Message buffer */
-    Message msg_buff = {0};
+		count = read (fd, buf, sizeof buf);
+		if (count == -1)
+		{
+			/* If errno == EAGAIN, that means we have read all
+			   data. So go back to the main loop. */
+			if (errno != EAGAIN)
+			{
+				perror ("read");
+				*done = 1;
+			}
+		   // printf("\nRead EAGAIN, Just Break, events[%d].data.fd = %d \n", i, events[i].data.fd);
+		   return FAILURE; 
+		}
+		else if (count == 0)
+		{
+			/* End of file. The remote has closed the
+			   connection. */
+			*done = 1;
+			return FAILURE; 
+		}
+		buf[count] = '\0';
+		
+		/*Deserialize the buf and put it into Message buffer */
+		Message msg_buff = {0};
 
-    parseJson(buf, &msg_buff);
-    //msg_buff.client_id = fd;
- 
-   /**/ 
-    pthread_mutex_lock(&mutex1);
+		parseJson(buf, &msg_buff);
+		//msg_buff.client_id = fd;
+	 
+	   /**/ 
+		pthread_mutex_lock(&mutex1);
+		push_tail(&list.head, &msg_buff);
+		pthread_cond_broadcast(&cond1);
+		pthread_mutex_unlock(&mutex1);
 
-    push_tail(&list.head, &msg_buff);
-    
-    pthread_cond_broadcast(&cond1);
-
-    pthread_mutex_unlock(&mutex1);
-
-  //  printf("\nsize_list = %d\n", size_list(list.head));
-
-    printf("\n Main thread : Rcvd data from fd = %d :: %s \n",fd, buf);
+	  //  printf("\nsize_list = %d\n", size_list(list.head));
+		printf("\n Main thread : Rcvd data from fd = %d :: %s \n",fd, buf);
 
      }
     else if (evt & EPOLLOUT)

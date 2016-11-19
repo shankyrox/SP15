@@ -182,6 +182,7 @@ int populate_and_send_data(int event, int *data, int datalen, int fd, int client
     msg.event = event;
     msg.data_len = datalen;
     msg.result = 1;
+	msg.data = MALLOC(datalen * sizeof(int));
     memcpy(msg.data, data, sizeof(int)*datalen);
     parseStruct(&msg_str, &msg);
 

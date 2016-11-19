@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "server.h"
+#include "common.h"
 
 /*Increasing the number of socket FDs supported*/
 void set_rlimit()

@@ -97,11 +97,12 @@ main (int argc, char *argv[])
     /*Creat thread*/
     for(i=0; i < MAX_NUM_WORKER_SERVER; i++) 
 	{
-		 thread_id = MALLOC(sizeof(int));
+		thread_id = MALLOC(sizeof(int));
 		*thread_id = i;
         pthread_create(&worker[i], NULL, worker_thread_fun, thread_id);
     }
 
+	// The Event loop
     while (1)
     {
         int num_fd_ready = 0, i=0;
@@ -131,9 +132,9 @@ main (int argc, char *argv[])
                 }
                 /* We have a notification on the listening socket, which
                    means one or more incoming connections. */
-                while (SUCCESS)
+                while (1)
                 {
-                    if(accept_new_conn())
+                    if(accept_new_conn() == SUCCESS)
                     {
                         break;        
                     }
@@ -159,7 +160,7 @@ main (int argc, char *argv[])
                 }
                 else
                 {
-                    while (SUCCESS)
+                    while (1)
                     {
                         if(!(process_function(&done, events[i].events, events[i].data.fd)))
                         {
@@ -191,7 +192,7 @@ main (int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-
+//Should be moved to server_socket.c file later. Ensure all variables needed are present
 int accept_new_conn()
 {
     struct sockaddr in_addr;
@@ -241,68 +242,61 @@ int accept_new_conn()
         perror ("epoll_ctl");
         exit (EXIT_FAILURE);
     }
+
     memset(buf, 0x00,  strlen(buf));
-
-   int arr[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
-
+	int arr[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
     populate_and_send_data(SERVER_CCLIENT_GROUP_IDS_SUPPORTED, arr, 20, infd, infd);
 
-    
-return SUCCESS;
+	return SUCCESS;
 }
-
-
 
 int process_function(int *done, int evt, int fd)
 {
     char buf[BUFFSIZE];
     ssize_t count;
-    memset(buf, 0x00,  strlen(buf));
-                       
+
     if(evt & EPOLLIN)
     {
-    count = read (fd, buf, sizeof buf);
-    if (count == -1)
-    {
-        /* If errno == EAGAIN, that means we have read all
-           data. So go back to the main loop. */
-        if (errno != EAGAIN)
-        {
-            perror ("read");
-            *done = 1;
-        }
-       // PRINT("\nRead EAGAIN, Just Break, events[%d].data.fd = %d \n", i, events[i].data.fd);
-       return FAILURE; 
-    }
-    else if (count == 0)
-    {
-        /* End of file. The remote has closed the
-           connection. */
-        *done = 1;
-        return FAILURE; 
-    }
-    buf[count] = '\0';
-    
-    /*Deserialize the buf and put it into Message buffer */
-    Message msg_buff = {0};
+		count = read (fd, buf, sizeof buf);
+		if (count == -1)
+		{
+			/* If errno == EAGAIN, that means we have read all
+			   data. So go back to the main loop. */
+			if (errno != EAGAIN)
+			{
+				perror ("read");
+				*done = 1;
+			}
+		   // PRINT("\nRead EAGAIN, Just Break, events[%d].data.fd = %d \n", i, events[i].data.fd);
+		   return FAILURE; 
+		}
+		else if (count == 0)
+		{
+			/* End of file. The remote has closed the
+			   connection. */
+			*done = 1;
+			return FAILURE; 
+		}
+		buf[count] = '\0';
+		
+		/*Deserialize the buf and put it into Message buffer */
+		Message msg_buff = {0};
 
-    parseJson(buf, &msg_buff);
-    msg_buff.client_id = fd;
+		parseJson(buf, &msg_buff);
+		msg_buff.client_id = fd;
 
-    pthread_mutex_lock(&mutex1);
+		pthread_mutex_lock(&mutex1);
 
-    push_tail(&list.head, &msg_buff);
-    
-    pthread_cond_broadcast(&cond1);
+		push_tail(&list.head, &msg_buff);
+		
+		pthread_cond_broadcast(&cond1);
 
-    pthread_mutex_unlock(&mutex1);
+		pthread_mutex_unlock(&mutex1);
 
-  //  PRINT("\nsize_list = %d\n", size_list(list.head));
+	  //  PRINT("\nsize_list = %d\n", size_list(list.head));
 
-    PRINT("\n Main thread : Rcvd data from fd = %d :: %s \n",fd, buf);
-
-
-    
+		PRINT("\n Main thread : Rcvd data from fd = %d :: %s \n",fd, buf);
+		
     }
     else if (evt & EPOLLOUT)
     {
