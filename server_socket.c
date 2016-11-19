@@ -3,6 +3,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "server.h"
 
 /*Increasing the number of socket FDs supported*/
