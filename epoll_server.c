@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include "server.h"
 #include "common.h"
-#include "list.h"
 /*Global variable*/
 client_group client_grps[MAX_GROUP];
 
@@ -15,7 +14,7 @@ int sfd, efd;
 List list;
 
 
-Copute current_comp_req = {0};
+Compute current_comp_req = {0};
 
 pthread_t worker[MAX_NUM_WORKER_SERVER];
 pthread_cond_t cond1;
@@ -86,7 +85,7 @@ main (int argc, char *argv[])
     }
 
     /* Buffer where events are returned */
-    events = calloc (MAX_EVENTS, sizeof event);
+    events = calloc (MAX_EVENTS, sizeof (event));
 
     
     printf("\nServer initialized!! Waiting for client connections . . \n");
@@ -292,7 +291,7 @@ int process_function(int *done, int evt, int fd)
 
     pthread_mutex_lock(&mutex1);
 
-    push_tail(&list.head, msg_buff);
+    push_tail(&list.head, &msg_buff);
     
     pthread_cond_broadcast(&cond1);
 
@@ -314,91 +313,58 @@ int process_function(int *done, int evt, int fd)
    return SUCCESS;
 }
 
-
-void worker_thread_fun(void *id)
+void handle_group_join(Message *msg)
 {
-    int mythread_id = (int)id; 
-    Message *data;
 
-
-    printf("\nWorker thread [%d] initialized!!\n", id);
-    while(1)
-    {
-        pthread_mutex_lock(&mutex1);
-        while(size_list(list.head) < 1)
+      PRINT("\nClient wanted to joing group : %d\n", msg->data[0]);
+        /*Add client to group*/
+        if(!add_client_to_group(msg->client_id, msg->data[0]))
         {
-            pthread_cond_wait(&cond1, &mutex1);
+            PRINT("\n Group Join failed for msg->client_id =  %d ", msg->client_id);
+            close(msg->client_id);
+            return;
         }
-
-        while(size_list(list.head))
-        {
-            data = (Message*)malloc(sizeof(Message));
-            pop_head(&(list.head), data); //use double pointer here
-
-            PRINT("\nsize_list after pop = %d\n", size_list(list.head));
-            event_handler(data);  
-            free(data);
-        
-        }
-        pthread_mutex_unlock(&mutex1);
-    }
+        //display the full group data
+        display_group_data(); 
 }
 
-/* Client */
-void event_handler(Mesage *data)
+void divide_array_and_send(int cfd, int start,int end,int *array)
 {
-    //Verify the data here
-    PRINT("\nevent_handler event = %d\n", data->event);
     
-    switch(data->event)
+    int i, data[300];
+    for(i =0; i<end; i++)
     {
-        case CCLIENT_SERVER_GROUP_ID_TO_JOIN : 
-            handle_group_join(data);
-        break;
+        data[i] = array[start++];    
+    }
 
-        case CCLIENT_SERVER_GROUP_ID_EXIT: 
-           // handle_group_exit(data);
-        break;
-        
-        case CCLIENT_SERVER_COMPUTE_RESULT: 
-            collect_compute_result_and_process(data);
-        break;
-        
-        case JCLIENT_SERVER_COMPUTE_MY_DATA:
-            process_new_compute_req(data);
-        break;
-        default : 
-             PRINT("\nNot a valid Event %d\n", data->event);
-        break;
- }
-
+    populate_and_send_data(SERVER_CCLIENT_DATA_TO_COMPUTE, data, i, cfd, cfd);
 }
 
 int get_mcast_index()
 {
 
 
-    int mcast_id = -1   
-    int g=0, i=0;
-    int flag = 0 , tmp =0;
+    int mcast_id = -1;
 
-    for(g=0; g<MAX_GROUP; g++)
+    for(mcast_id=0; mcast_id<MAX_GROUP; mcast_id++)
     {
         
-        if(client_grps[g].num_of_client >= 2)
+        if(client_grps[mcast_id].num_of_client >= 2)
         {
           
-          return g;
+          return mcast_id;
        }
     }
     return -1;
 }
 
+
 int divide_work(int *array, int numentry)
 {
-    int g = get_mcast_index();
-    int div = numentry/client_grps[g].num_of_client;
-   unsigned char start, end;
+	int i, g, div;
+    g = get_mcast_index();
+    div = numentry/client_grps[g].num_of_client;
+  	unsigned char start, end;
 
 
     if(div > 2)
@@ -423,50 +389,6 @@ int divide_work(int *array, int numentry)
         return -1;
 }
 
-void divide_array_and_send(int cfd,start, end, array)
-{
-    
-    int i, data[300],
-    for(i =0; i<end; i++)
-    {
-        data[i] = array[start++];    
-    }
-
-    populate_and_send_data(SERVER_CCLIENT_DATA_TO_COMPUTE, data, i, cfd, cfd);
-    
-}
-
-
-void handle_group_join(Message *msg)
-{
-
-      PRINT("\nClient wanted to joing group : %d\n", msg->data[0]);
-        /*Add client to group*/
-        if(!add_client_to_group(msg->client_id, msg->data[0]))
-        {
-            PRINTF("\n Group Join failed for msg->client_id =  %d ", msg->client_id);
-            close(msg->client_id);
-            return;
-        }
-        //display the full group data
-        display_group_data(); 
-}
-
-void process_new_compute_req(Message *msg)
-{
-
-    static int id = 0;
-    current_comp_req.client_id = msg->client_id;
-    current_comp_req.id = ++id;
-    current_comp_req.status = 0;
-    current_comp_req.result = 0;
-    memcpy(&current_comp_req.data, msg->data, strlen(msg->data));
-
-   if(-1 == divide_work(&current_comp_req.data, msg->datalen))
-   {
-       compute_the_result_and_send(msg);
-   }
-}
 
 void compute_the_result_and_send(Message *msg)
 {
@@ -474,8 +396,9 @@ void compute_the_result_and_send(Message *msg)
     if(!msg)
         return;
 
-    int i=0, max[0] = msg->data[0];
-    for(i=1; i< msg->datalen; i++)
+    int i=0; 
+	max[0] = msg->data[0];
+    for(i=1; i< msg->data_len; i++)
     {
         if(max[0] < msg->data[i])
             max[0] = msg->data[i];
@@ -483,3 +406,80 @@ void compute_the_result_and_send(Message *msg)
 
     populate_and_send_data(SERVER_JCLIENT_FINAL_COMPUTE_RESULT, max, 1, msg->client_id, msg->client_id);
 }
+
+void process_new_compute_req(Message *msg)
+{
+
+    static int id = 0;
+    current_comp_req.client_id = msg->client_id;
+    current_comp_req.req_id = ++id;
+    current_comp_req.status = 0;
+    current_comp_req.result = 0;
+    memcpy(&current_comp_req.data, msg->data, sizeof(int)*msg->data_len);
+
+   if(-1 == divide_work(current_comp_req.data, msg->data_len))
+   {
+       compute_the_result_and_send(msg);
+   }
+}
+
+
+/* Client */
+void event_handler(Message *data)
+{
+    //Verify the data here
+    PRINT("\nevent_handler event = %d\n", data->event);
+    
+    switch(data->event)
+    {
+        case CCLIENT_SERVER_GROUP_ID_TO_JOIN : 
+            handle_group_join(data);
+        break;
+
+        case CCLIENT_SERVER_GROUP_ID_EXIT: 
+           // handle_group_exit(data);
+        break;
+        
+        case CCLIENT_SERVER_COMPUTE_RESULT: 
+            //collect_compute_result_and_process(data);
+        break;
+        
+        case JCLIENT_SERVER_COMPUTE_MY_DATA:
+            process_new_compute_req(data);
+        break;
+        default : 
+             PRINT("\nNot a valid Event %d\n", data->event);
+        break;
+ }
+
+}
+
+void worker_thread_fun(void *id)
+{
+    int mythread_id = *(int *)id; 
+    Message *data;
+
+
+    printf("\nWorker thread [%d] initialized!!\n", mythread_id);
+    while(1)
+    {
+        pthread_mutex_lock(&mutex1);
+        while(size_list(list.head) < 1)
+        {
+            pthread_cond_wait(&cond1, &mutex1);
+        }
+
+        while(size_list(list.head))
+        {
+            data = (Message*)malloc(sizeof(Message));
+            pop_head(&(list.head), data); //use double pointer here
+
+            PRINT("\nsize_list after pop = %d\n", size_list(list.head));
+            event_handler(data);  
+            free(data);
+        
+        }
+        pthread_mutex_unlock(&mutex1);
+    }
+}
+

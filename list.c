@@ -5,7 +5,7 @@ void push_tail(Node** head, Message *new_data)
 {
     Node* new_node = (struct node*) malloc(sizeof(Node));
     Node * tmp = *head;
-    memcpy(new_node->data, new_data, sizeof(Message));
+    memcpy(&new_node->data, new_data, sizeof(Message));
   
     new_node->next =  NULL;
 
@@ -26,13 +26,13 @@ void pop_head(Node ** head, Message *arr)
 {
     if(*head == NULL)
     {    
-        return NULL;
+        return ;
     }
     else
     {
         Node *tmp = *head;
         *head= (*head)->next;
-        memcpy(arr, tmp->data, sizeof(Message));
+        memcpy(arr, &tmp->data, sizeof(Message));
         free(tmp);
         /*Must free the node*/
     }

@@ -4,11 +4,16 @@
 #ifndef _COMMON_DEF_
 #define _COMMON_DEF_
 
-/*Common structures and events*/
+#include <string.h>
+#include <sys/socket.h>
+#include <pthread.h>
 #include <jansson.h>
 
+/*Common structures and events*/
 #define TRUE 1
 #define FALSE 0
+
+#define SUCCESS 1
 
 #define MAX_NUM_WORKER_SERVER 4
 #define MAX_NUM_WORKER_CLIENT 2
@@ -16,7 +21,7 @@
 #define BUFFSIZE 1500// max number of bytes we can get at once
 
 #ifdef DEBUG_FLAG
-#define PRINT printf;
+#define PRINT printf
 #endif
 
 typedef enum result
@@ -40,13 +45,13 @@ typedef enum events
 
 /*Generic Messsage Structure for communication between
 client and server*/
-typedef struct Generic_message
+typedef struct 
 {
     Events event;
     Result result;
     int client_id;
     int data_len;
-    int data[300];
+    int *data;
 }Message;
 
 typedef struct node
@@ -67,14 +72,14 @@ typedef struct compute_req
     int client_id;
     int status;
     int result;
-    int data[300];
-    
-}Copute;
+    int *data;
+}Compute;
 
 
 void pop_head(Node ** head, Message *arr);
 void push_tail(Node** head, Message *new_data);
 
+int populate_and_send_data(int event, int *data, int datalen, int fd, int client_id);
 
 
 int size_list(Node *head);

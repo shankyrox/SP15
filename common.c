@@ -42,7 +42,7 @@ void  serializeTask(unsigned char* msg, const Message *t)
     msg = serialize_int(msg,t->event);
     msg = serialize_int(msg,t->result);
     msg = serialize_int(msg,t->data_len);
-    for(i=0; i< strlen(t->data); i++)
+    for(i=0; i< t->data_len; i++)
             msg = serialize_int(msg,t->data[i]);
 }
 
@@ -54,7 +54,7 @@ void dserializeTask(unsigned char* msg, Message *t)
     t->result = deserialize_int(msg+4);
     t->data_len = deserialize_int(msg+8);
     int size = 8;
-    for(i=0; i< strlen(t->data); i++)
+    for(i=0; i<t->data_len; i++)
     {
         t->data[i] = deserialize_int(msg+ size);
     }
@@ -143,7 +143,7 @@ static int parseJsonToIntStruct(json_t *obj, Message *msg){
 	json_t *temp_arr = json_object_get(obj, "data");
 	for (i=0; i < msg->data_len; i++){
 		x = json_integer_value(json_array_get(temp_arr, i));
-		data[i] = x;
+		msg->data[i] = x;
 		//memcpy((int *)msg->data+i, &x, sizeof(int));
 	}
 	return SUCCESS;
@@ -176,20 +176,19 @@ int parseJson(char *strMsg, Message *msg){
 
 int populate_and_send_data(int event, int *data, int datalen, int fd, int client_id)
 {
-    char *data = NULL;
     Message msg= {0};
-
+	char *msg_str = NULL;
     msg.client_id = client_id;
     msg.event = event;
     msg.data_len = datalen;
     msg.result = 1;
     memcpy(msg.data, data, sizeof(int)*datalen);
-    parseStruct(&data, &msg);
+    parseStruct(&msg_str, &msg);
 
-    if(-1 ==  send(fd, data, strlen(data)))
+    if(-1 ==  send(fd, msg_str, strlen(msg_str), 0))
     {
         perror("send");
-        -1;
+        return -1;
     }
 }
 

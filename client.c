@@ -6,7 +6,6 @@
 #include "client.h"
 #include "common.h"
 #include "server.h"
-#include "list.h"
 
 pthread_t worker[MAX_NUM_WORKER_CLIENT];
 pthread_cond_t cond1;
@@ -59,11 +58,9 @@ struct epoll_event event;
 
 int main(int argc, char *argv[])
 {
-    int sockfd, numbytes;  
-    unsigned char buf[BUFFSIZE];
+    int sockfd;  
     struct addrinfo hints, *servinfo, *p;
     int rv;
-    char * groupid;
     char s[INET6_ADDRSTRLEN];
 
     if (argc != 3) {
@@ -258,7 +255,7 @@ int process_function(int *done, int evt, int fd)
    /**/ 
     pthread_mutex_lock(&mutex1);
 
-    push_tail(&list.head,msg_buff);
+    push_tail(&list.head, &msg_buff);
     
     pthread_cond_broadcast(&cond1);
 
@@ -278,44 +275,15 @@ int process_function(int *done, int evt, int fd)
    return SUCCESS;
 }
 
-void worker_thread_fun(void *id)
-{
-    int mythread_id = (int)id; 
-    Message *data;
-
-
-    printf("\nWorker thread [%d] initialized!!\n", id);
-    while(1)
-    {
-        pthread_mutex_lock(&mutex1);
-        while(size_list(list.head) < 1)
-        {
-            pthread_cond_wait(&cond1, &mutex1);
-        }
-
-        while(size_list(list.head))
-        {
-            data = (Message*)malloc(sizeof(Message));
-            pop_head(&(list.head), data);  //use double pointer
-
-            PRINT("\nsize_list after pop = %d\n", size_list(list.head));
-            event_handler(data);
-            free(data);
-        
-        }
-        pthread_mutex_unlock(&mutex1);
-    }
-}
-
 /* Client */
-void event_handler(Mesage *data)
+void event_handler(Message *data)
 {
     //Verify the data here
     PRINT("\nevent_handler event = %d\n", data->event);
     
     switch(data->event)
     {
-        case :SERVER_CCLIENT_GROUP_IDS_SUPPORTED: 
+        case SERVER_CCLIENT_GROUP_IDS_SUPPORTED: 
             //select_group_join(data);
         break;
 
@@ -337,6 +305,32 @@ void event_handler(Mesage *data)
 
 }
 
+void worker_thread_fun(void *id)
+{
+    int mythread_id = *(int *)id; 
+    Message *data;
 
 
+    printf("\nWorker thread [%d] initialized!!\n", mythread_id);
+    while(1)
+    {
+        pthread_mutex_lock(&mutex1);
+        while(size_list(list.head) < 1)
+        {
+            pthread_cond_wait(&cond1, &mutex1);
+        }
+
+        while(size_list(list.head))
+        {
+            data = (Message*)malloc(sizeof(Message));
+            pop_head(&(list.head), data);  //use double pointer
+
+            PRINT("\nsize_list after pop = %d\n", size_list(list.head));
+            event_handler(data);
+            free(data);
+        
+        }
+        pthread_mutex_unlock(&mutex1);
+    }
+}
 

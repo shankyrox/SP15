@@ -5,7 +5,7 @@
 #
 #
 CC = gcc
-CFLAGS  = -g -Wall
+CFLAGS  = -g -Wall -ljansson
 
 FLAG = -DDEBUG_FLAG 
 
