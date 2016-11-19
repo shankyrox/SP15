@@ -1,0 +1,6 @@
+/*Some importent points*/
+
+>The server program will not run on MAC-OS as epoll is not supported on MAC.
+
+> There are known limitations in the server and client programs, which will be resolved later.
+
