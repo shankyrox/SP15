@@ -190,13 +190,18 @@ main (int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+int send_groups_to_client(int infd){
+	int arr[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
+    populate_and_send_data(SERVER_CCLIENT_GROUP_IDS_SUPPORTED, arr, 20, infd, infd);
+	return SUCCESS;
+}
+
 //Should be moved to server_socket.c file later. Ensure all variables needed are present
 int accept_new_conn()
 {
     struct sockaddr in_addr;
     socklen_t in_len;
     int infd, s;
-    char buf[BUFFSIZE];
     char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
 
     in_len = sizeof in_addr;
@@ -241,9 +246,8 @@ int accept_new_conn()
         exit (EXIT_FAILURE);
     }
 
-    memset(buf, 0x00,  strlen(buf));
-	int arr[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
-    populate_and_send_data(SERVER_CCLIENT_GROUP_IDS_SUPPORTED, arr, 20, infd, infd);
+	//Send available groups to join to client
+	send_groups_to_client(infd);
 
 	return SUCCESS;
 }
@@ -302,21 +306,6 @@ int process_function(int *done, int evt, int fd)
     }
 
    return SUCCESS;
-}
-
-void handle_group_join(Message *msg)
-{
-
-      PRINT("\nClient wanted to joing group : %d\n", msg->data[0]);
-        /*Add client to group*/
-        if(!add_client_to_group(msg->client_id, msg->data[0]))
-        {
-            PRINT("\n Group Join failed for msg->client_id =  %d ", msg->client_id);
-            close(msg->client_id);
-            return;
-        }
-        //display the full group data
-        display_group_data(); 
 }
 
 void divide_array_and_send(int cfd, int start,int end,int *array)

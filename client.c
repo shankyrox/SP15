@@ -12,37 +12,12 @@ pthread_cond_t cond1;
 pthread_mutex_t mutex1;
 int client_id = 0xffff;
 
-int efd;
+int efd, sockfd;
 
 List list;
 
 int process_function(int *done, int event, int fd);
 void *worker_thread_fun(void *thread_id);
-
-char* selectGroup(char *msg)
-{
-    char *groups[MAX_GROUPS], *groupId;
-    int nGroups = 0, randIdx, x= 0;
-    srand(time(NULL));
-    groupId = strtok(msg, ",");
-
-    struct timeval time;
-    gettimeofday(&time, NULL);
-
-    printf("\nGroup ids supported at server are : ");
-    while(groupId != NULL)
-    { 
-        groups[nGroups] = groupId;
-        printf("  %s",groups[nGroups]);
-        nGroups+=1;
-        groupId = strtok(NULL, ",");
-    }
-
-    x= time.tv_usec % nGroups;
-
-    randIdx = ( rand() + x) % nGroups;
-    return groups[randIdx];
-}
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -58,7 +33,6 @@ struct epoll_event event;
 
 int main(int argc, char *argv[])
 {
-    int sockfd;  
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
@@ -236,7 +210,7 @@ void event_handler(Message *data)
     switch(data->event)
     {
         case SERVER_CCLIENT_GROUP_IDS_SUPPORTED: 
-            //select_group_join(data);
+            select_group_join(data);
         break;
 
         case SERVER_CCLIENT_CONNECTION_ACCEPTED: 

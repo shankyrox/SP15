@@ -7,6 +7,7 @@
 
 #include <netdb.h>
 #include <unistd.h>
+#include "common.h"
 #include <fcntl.h>
 
 #include <sys/resource.h>
@@ -27,7 +28,7 @@ typedef struct client_groups {
 
 /*Function signatures*/
 void init_group_val() ;
-int add_client_to_group(int c_id, int g_id);
+int handle_group_join(Message *);
 void remove_client_from_group(int c_id);
 void display_group_data() ;
 

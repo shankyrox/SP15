@@ -49,7 +49,8 @@ typedef enum result
 
 /*Currently supported events*/
 typedef enum events
-{
+{   
+	//CCLIENT = compute client, JCLIENT = job client
     SERVER_CCLIENT_GROUP_IDS_SUPPORTED =0,  // Int array
     SERVER_CCLIENT_CONNECTION_ACCEPTED =1,  // String
     SERVER_CCLIENT_DATA_TO_COMPUTE =2,       // Int Array
@@ -98,11 +99,9 @@ void push_tail(Node** head, Message *new_data);
 
 int populate_and_send_data(int event, int *data, int datalen, int fd, int client_id);
 
-
 int size_list(Node *head);
 
 void dserializeTask(unsigned char* msg, Message *t);
-
 void serializeTask(unsigned char* msg, const Message *t);
 
 int parseStruct(char **, Message *);

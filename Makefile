@@ -29,11 +29,14 @@ list.o: list.c common.h
 	$(CC) $(CFLAGS) -c list.c
 
 
-client:  client.o common.o list.o
-	$(CC) $(CFLAGS) -o client client.o common.o list.o -lpthread
+client:  client.o client_utils.o common.o list.o
+	$(CC) $(CFLAGS) -o client client.o client_utils.o common.o list.o -lpthread
 
 client.o: client.c client.h common.h
 	$(CC) $(CFLAGS) -c client.c
+
+client_utils.o: client_utils.c client.h common.h
+	$(CC) $(CFLAGS) -c client_utils.c
 
 common.o: common.c common.h
 	$(CC) $(CFLAGS) -c common.c 

@@ -190,4 +190,3 @@ int populate_and_send_data(int event, int *data, int datalen, int fd, int client
     }
 	return SUCCESS;
 }
-

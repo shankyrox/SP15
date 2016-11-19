@@ -22,7 +22,7 @@ void init_group_val()
 }
 
 /*Add the client to a group*/
-int add_client_to_group(int c_id, int g_id) 
+static int add_client_to_group(int c_id, int g_id) 
 {
 
     int n = client_grps[g_id].num_of_client;
@@ -102,19 +102,19 @@ void display_group_data()
     printf("\n\nServer: Total number of clients active at the moment = %d \n", count);
 }
 
-/*
-void handle_group_join(Message *msg)
+int handle_group_join(Message *msg)
 {
 
-      PRINT("\nClient wanted to joing group : %d\n", msg->data[0]);
-        //Add client to group
-        if(!add_client_to_group(msg->client_id, msg->data[0]))
-        {
-            printf("\n Group Join failed for msg->client_id =  %d ", msg->client_id);
-            close(msg->client_id);
-            return;
-        }
-        //display the full group data
-        display_group_data(); 
+	PRINT("\nClient wanted to joing group : %d\n", msg->data[0]);
+   	//Add client to group
+   	if(add_client_to_group(msg->client_id, msg->data[0])!=SUCCESS)
+   	{
+   		printf("\n Group Join failed for msg->client_id =  %d ", msg->client_id);
+        close(msg->client_id);
+        return FAILURE;
+    }
+    //display the full group data
+    display_group_data(); 
+	return SUCCESS;
 }
-*/
+
