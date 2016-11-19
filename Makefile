@@ -42,5 +42,4 @@ common.o: common.c common.h
 # removes the executable file, as well as old .o object
 #
 clean: 
-	find . -type f | xargs -n 5 touch
 	-rm -f *.o *.core core.* *.h.gch server client

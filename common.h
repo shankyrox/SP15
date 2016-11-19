@@ -21,16 +21,24 @@
 /*Common structures and events*/
 #define TRUE 1
 #define FALSE 0
-
 #define SUCCESS 1
 #define FAILURE 0
-
 
 #define BUFFSIZE 1500// max number of bytes we can get at once
 
 #ifdef DEBUG_FLAG
 #define PRINT printf
 #endif
+
+static inline void *
+mem_alloc(char *file, int line, int size){
+	void *ptr = malloc(size);
+	if (ptr == NULL) 
+		printf("(Error) Malloc Failure in %s[%d] for size %d\n", file, line, size);
+	return ptr;
+}
+
+#define MALLOC(size) mem_alloc(__FILE__, __LINE__, size)
 
 typedef enum result
 {
