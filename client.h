@@ -6,7 +6,6 @@
 #define _CLIENT_DEF_
 
 #include <unistd.h>
-#include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <time.h>

@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <sys/epoll.h>
 #include <sys/time.h>
+#include <errno.h>
 #include <pthread.h>
 #include <jansson.h>
 
@@ -24,7 +25,7 @@
 #define SUCCESS 1
 #define FAILURE 0
 
-#define BUFFSIZE 1500// max number of bytes we can get at once
+#define BUFFSIZE 10000// max number of bytes we can get at once
 
 #ifdef DEBUG_FLAG
 #define PRINT printf
