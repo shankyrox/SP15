@@ -22,8 +22,8 @@
 /*Common structures and events*/
 #define TRUE 1
 #define FALSE 0
-#define SUCCESS 1
-#define FAILURE 0
+#define SUCCESS 0
+#define FAILURE -1
 
 #define BUFFSIZE 10000// max number of bytes we can get at once
 
