@@ -2,8 +2,6 @@
 ** epoll_server.c 
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "server.h"
 #include "common.h"
 /*Global variable*/
@@ -24,8 +22,7 @@ Message global_message;
 /*Function declarations*/
 int process_function(int *done, int event, int fd);
 int accept_new_conn();
-void worker_thread_fun(void *data);
-
+void *worker_thread_fun(void *thread_id);
 
 /*Driver program*/
 int
@@ -58,7 +55,14 @@ main (int argc, char *argv[])
     {
         exit (EXIT_FAILURE);
     }
-    
+
+     /*Start listening on the opened FD*/
+    if(listen (sfd, MAX_CONN_SUPORTED) == -1)
+    {
+        perror ("listen");
+        exit (EXIT_FAILURE);
+    }
+   
 
     /*Create epoll fd*/
     efd = epoll_create(MAX_CONN_SUPORTED);
@@ -68,12 +72,6 @@ main (int argc, char *argv[])
         exit (EXIT_FAILURE);
     }
     printf("\nepoll_create done efd=%d \n", efd);
-    /*Start listening on the opened FD*/
-    if(listen (sfd, MAX_CONN_SUPORTED) == -1)
-    {
-        perror ("listen");
-        exit (EXIT_FAILURE);
-    }
 
     /*Set the epoll_ctl for main epol fd*/
     event.data.fd = sfd;
@@ -97,14 +95,14 @@ main (int argc, char *argv[])
 
     int i =0;
     /*Creat thread*/
-    for(i=0; i< MAX_NUM_WORKER_SERVER; i++)
+    for(i=0; i < MAX_NUM_WORKER_SERVER; i++)
     {    
-        pthread_create(&worker[i], 0,  worker_thread_fun, (void*)(i+1));
+        pthread_create(&worker[i], NULL, worker_thread_fun, &i);
     }
 
-    while (SUCCESS)
+    while (1)
     {
-        int num_fd_ready =0, i=0;
+        int num_fd_ready = 0, i=0;
 
           PRINT("\n *********** On epoll_wait  ********** \n"); 
 
@@ -454,9 +452,9 @@ void event_handler(Message *data)
 
 }
 
-void worker_thread_fun(void *id)
+void *worker_thread_fun(void *thread_id)
 {
-    int mythread_id = *(int *)id; 
+    int mythread_id = *(int *)thread_id; 
     Message *data;
 
 

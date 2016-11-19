@@ -4,8 +4,17 @@
 #ifndef _COMMON_DEF_
 #define _COMMON_DEF_
 
+/*  List of header files to be included in both server and client
+ * Any common header file needed should be placed here 
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/epoll.h>
+#include <sys/time.h>
 #include <pthread.h>
 #include <jansson.h>
 
@@ -14,9 +23,8 @@
 #define FALSE 0
 
 #define SUCCESS 1
+#define FAILURE 0
 
-#define MAX_NUM_WORKER_SERVER 4
-#define MAX_NUM_WORKER_CLIENT 2
 
 #define BUFFSIZE 1500// max number of bytes we can get at once
 

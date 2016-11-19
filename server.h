@@ -5,18 +5,11 @@
 #ifndef _SERVER_DEF_
 #define _SERVER_DEF_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/epoll.h>
 #include <errno.h>
 
-#include <sys/time.h>
 #include <sys/resource.h>
 
 #define MAX_EVENTS 64
@@ -24,9 +17,7 @@
 
 #define MAX_GROUP 20
 #define MAX_CLIENTS_PER_GROUP 100
-
-#define FAILURE 0
-#define SUCCESS 1
+#define MAX_NUM_WORKER_SERVER 4
 
 /*Client Group structure*/
 typedef struct client_groups {
