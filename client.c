@@ -218,7 +218,7 @@ void event_handler(Message *data)
         break;
         
         case SERVER_CCLIENT_DATA_TO_COMPUTE: 
-            //compute_data_and_process(data);
+            compute_data(data);
         break;
         
         case SERVER_JCLIENT_FINAL_COMPUTE_RESULT:

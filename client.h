@@ -21,5 +21,6 @@
 
 void *get_in_addr(struct sockaddr *sa);
 int select_group_join(Message *);
+int compute_data(Message *);
 
 #endif

@@ -77,7 +77,12 @@ int find_minimum(int *a, int n) {
 //Need to have a field which specifies what is the job required to be done
 //Assuming that need to compute maximum
 int compute_data(Message *msg){
-	int *arr, size;
+	int *arr, size, result;
 	arr = msg->data;
 	size = msg->data_len;
+	result = find_maximum(arr, size);
+
+	//create a new msg for result and send to server
+	populate_and_send_data(CCLIENT_SERVER_COMPUTE_RESULT, &result, 1, sockfd, msg->client_id);
+	return SUCCESS;
 }
