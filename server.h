@@ -12,7 +12,6 @@
 
 #include <sys/resource.h>
 
-#define MAX_EVENTS 64
 #define MAX_CONN_SUPORTED 1000
 
 #define MAX_GROUP 20

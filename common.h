@@ -24,12 +24,14 @@
 #define FALSE 0
 #define SUCCESS 0
 #define FAILURE -1
+#define MAX_EVENTS 64
 
 #define BUFFSIZE 10000// max number of bytes we can get at once
 
 //#ifdef DEBUG_FLAG
 #define PRINT printf
 //#endif
+
 
 static inline void *
 mem_alloc(char *file, int line, int size){

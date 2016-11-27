@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include "client.h"
 #include "common.h"
-#include "server.h"
 
 pthread_t worker[MAX_NUM_WORKER_CLIENT];
 pthread_cond_t cond1;
