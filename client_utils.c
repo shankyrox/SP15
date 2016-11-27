@@ -37,3 +37,47 @@ int select_group_join(Message *msg){
 	populate_and_send_data(event_id, &grp_to_join, 1, sockfd, sockfd);
 	return SUCCESS;
 }
+
+//Returns the index of maximum element in the array
+int find_maximum(int *a, int n) {
+  int c, max, index;
+  if (n <=0) return -1;
+ 
+  max = a[0];
+  index = 0;
+ 
+  for (c = 1; c < n; c++) {
+    if (a[c] > max) {
+       index = c;
+       max = a[c];
+    }
+  }
+ 
+  return index;
+}
+
+//Returns the index of minimum element in the array
+int find_minimum(int *a, int n) {
+  int c, min, index;
+  if (n <=0) return -1;
+ 
+  min = a[0];
+  index = 0;
+ 
+  for (c = 1; c < n; c++) {
+    if (a[c] < min) {
+       index = c;
+       min = a[c];
+    }
+  }
+ 
+  return index;
+}
+
+//Need to have a field which specifies what is the job required to be done
+//Assuming that need to compute maximum
+int compute_data(Message *msg){
+	int *arr, size;
+	arr = msg->data;
+	size = msg->data_len;
+}
