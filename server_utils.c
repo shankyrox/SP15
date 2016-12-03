@@ -4,6 +4,7 @@
 #include "common.h"
 
 extern client_group client_grps[MAX_GROUP];
+extern int jclient_fd;
 
 /*Initialize group structure*/
 void init_group_val() 
@@ -55,6 +56,13 @@ void remove_client_from_group(int c_id)
     int g=0, i=0;
     int flag = 0 , tmp =0;
 
+	//Handle job_client connection closed
+	if (c_id == jclient_fd){
+		printf("job_client closed \n");
+		jclient_fd = 0;
+		return ;
+	}
+
     for(g=0; (g<MAX_GROUP) && (flag!=1); g++)
     {
         for (i=0; i < client_grps[g].num_of_client; i++) 
@@ -79,7 +87,6 @@ void remove_client_from_group(int c_id)
         printf("ERROR:: Client not found in any group \n");
         return ;
     }
-    return ;
 }
 
 void display_group_data() 

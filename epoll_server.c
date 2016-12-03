@@ -9,8 +9,8 @@ client_group client_grps[MAX_GROUP];
 
 struct epoll_event event;
 int sfd, efd;
+int jclient_fd = 0;
 List list;
-
 
 Compute current_comp_req = {0};
 
@@ -384,7 +384,7 @@ void compute_the_result_and_send(Message *msg)
             max[0] = msg->data[i];
     }
 
-    populate_and_send_data(SERVER_JCLIENT_FINAL_COMPUTE_RESULT, max, 1, msg->client_id, msg->client_id);
+    //populate_and_send_data(SERVER_JCLIENT_FINAL_COMPUTE_RESULT, max, 1, msg->client_id, msg->client_id);
 }
 
 void process_new_compute_req(Message *msg)
@@ -403,6 +403,19 @@ void process_new_compute_req(Message *msg)
    }
 }
 
+void set_jclient_fd(Message *msg){
+	int fd = msg->client_id;	
+	if (fd <= 0){
+		printf("ERROR: Invalid jclient_fd received\n");
+		return ;
+	}
+	if (jclient_fd != 0){
+		printf("Deleting existing jclient_fd and adding new\n");
+		close(jclient_fd);
+	}
+	printf("Adding new job client. jclient_fd = %d\n", fd);
+	jclient_fd = fd;
+}
 
 /* Client */
 void event_handler(Message *data)
@@ -414,11 +427,11 @@ void event_handler(Message *data)
     {
         case CCLIENT_SERVER_GROUP_ID_TO_JOIN : 
             handle_group_join(data);
-        break;
+	        break;
 
         case CCLIENT_SERVER_GROUP_ID_EXIT: 
-           // handle_group_exit(data);
-        break;
+            // handle_group_exit(data);
+			break;
         
         case CCLIENT_SERVER_COMPUTE_RESULT: 
             //collect_compute_result_and_process(data);
@@ -426,7 +439,12 @@ void event_handler(Message *data)
         
         case JCLIENT_SERVER_COMPUTE_MY_DATA:
             process_new_compute_req(data);
-        break;
+			break;
+
+		case JCLIENT_SERVER_JOIN:
+			set_jclient_fd(data);
+			break;
+
         default : 
              PRINT("\nNot a valid Event %d\n", data->event);
         break;
