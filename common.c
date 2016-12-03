@@ -68,6 +68,7 @@ const char* eventEnumToStr[] = {
 	    "CCLIENT_SERVER_GROUP_ID_EXIT",
 	    "CCLIENT_SERVER_COMPUTE_RESULT",
 	    "JCLIENT_SERVER_COMPUTE_MY_DATA",
+		"JCLIENT_SERVER_JOIN",
 		"MAX_CLIENT_SERVER_EVENTS"
 	};
 
@@ -111,7 +112,8 @@ int parseStruct(char **str, Message *msg){
 		case CCLIENT_SERVER_GROUP_ID_TO_JOIN : ;
 		case CCLIENT_SERVER_GROUP_ID_EXIT : ;
 		case CCLIENT_SERVER_COMPUTE_RESULT : ;
-		case JCLIENT_SERVER_COMPUTE_MY_DATA :
+		case JCLIENT_SERVER_COMPUTE_MY_DATA : ;
+		case JCLIENT_SERVER_JOIN:
 			parseIntStructToJson(obj, msg);
 			break;
 		default : return -1;
@@ -150,7 +152,6 @@ int parseJson(char *strMsg, Message *msg){
 	json_error_t err = {0};
 	json_t *obj = json_loads( strMsg, 0, &err);
 	msg->event = json_integer_value(json_object_get(obj, "event"));
-	printf("event p = %d\n", msg->event);
 	switch(msg->event){
 		case SERVER_CCLIENT_CONNECTION_ACCEPTED : 
 		case SERVER_CCLIENT_GROUP_IDS_SUPPORTED : 
@@ -160,6 +161,7 @@ int parseJson(char *strMsg, Message *msg){
 		case CCLIENT_SERVER_GROUP_ID_EXIT :
 		case CCLIENT_SERVER_COMPUTE_RESULT : 
 		case JCLIENT_SERVER_COMPUTE_MY_DATA :
+		case JCLIENT_SERVER_JOIN:
 			parseJsonToIntStruct(obj, msg);
 			break;
 		default : 

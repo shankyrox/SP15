@@ -53,14 +53,15 @@ typedef enum result
 typedef enum events
 {   
 	//CCLIENT = compute client, JCLIENT = job client
-    SERVER_CCLIENT_GROUP_IDS_SUPPORTED =0,  // Int array
-    SERVER_CCLIENT_CONNECTION_ACCEPTED =1,  // String
-    SERVER_CCLIENT_DATA_TO_COMPUTE =2,       // Int Array
-    SERVER_JCLIENT_FINAL_COMPUTE_RESULT =3, // Int array, Size one
-    CCLIENT_SERVER_GROUP_ID_TO_JOIN =4, // Int arr, size 1, 
-    CCLIENT_SERVER_GROUP_ID_EXIT =5,    // Int arr, Size 1,
-    CCLIENT_SERVER_COMPUTE_RESULT =6,   // Int arr, size 1,
-    JCLIENT_SERVER_COMPUTE_MY_DATA =7,  // int array, size huge
+    SERVER_CCLIENT_GROUP_IDS_SUPPORTED =0,  
+    SERVER_CCLIENT_CONNECTION_ACCEPTED =1,  // Never used so far
+    SERVER_CCLIENT_DATA_TO_COMPUTE =2,      
+    SERVER_JCLIENT_FINAL_COMPUTE_RESULT =3, 
+    CCLIENT_SERVER_GROUP_ID_TO_JOIN =4, 
+    CCLIENT_SERVER_GROUP_ID_EXIT =5,    
+    CCLIENT_SERVER_COMPUTE_RESULT =6,  
+    JCLIENT_SERVER_COMPUTE_MY_DATA =7,
+	JCLIENT_SERVER_JOIN,
 }Events;
 
 /*Generic Messsage Structure for communication between
