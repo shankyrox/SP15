@@ -1,0 +1,7 @@
+*.o
+*.swp
+client
+server
+note.txt
+a.out
+job_client
