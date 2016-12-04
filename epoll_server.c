@@ -4,6 +4,7 @@
 
 #include "server.h"
 #include "common.h"
+#include "debug.h"
 /*Global variable*/
 client_group client_grps[MAX_GROUP];
 
@@ -36,7 +37,18 @@ main (int argc, char *argv[])
         fprintf(stderr, "Usage: %s [port]\n", argv[0]);
         exit (EXIT_FAILURE);
     }
-
+  
+   /* send argv info for sys log file creation */
+   create_log_file(argv[0]);
+   for (int i= 1 ; i <argc ; i++) {
+       if (strcmp((argv+i) , "-dbg") == 0) {
+          dbg_flag = 1;
+       }
+       if (strcmp((argv+i), "-to_syslog_file") == 0) {
+          to_file = 0;
+       }
+    }
+    print_sys_log("\nInitiliasing the server...\n" , INFO);
     printf("\nInitilizing Server.. \n");  
     /*Setting rlimit*/
     set_rlimit();
@@ -71,7 +83,10 @@ main (int argc, char *argv[])
         perror ("epoll_create");
         exit (EXIT_FAILURE);
     }
-    printf("\nepoll_create done efd=%d \n", efd);
+    char *tmp;
+    snprintf(tmp ,100, "\n epoll_create done efd = %d" ,efd);
+    print_sys_log(tmp, INFO);
+    //printf("\nepoll_create done efd=%d \n", efd);
 
     /*Set the epoll_ctl for main epol fd*/
     event.data.fd = sfd;
@@ -85,16 +100,17 @@ main (int argc, char *argv[])
     /* Buffer where events are returned */
     events = calloc (MAX_EVENTS, sizeof (event));
 
-    printf("\nServer initialized!! Waiting for client connections . . \n");
+    print_sys_log("\nServer initialized!! Waiting for client connections . . \n", INFO);
+    //printf("\nServer initialized!! Waiting for client connections . . \n");
     /* The event loop */
     
     /*Init linked list*/
     list.head=NULL;
     list.count=0;
 
-    int i =0, *thread_id;
+    int  *thread_id;
     /*Creat thread*/
-    for(i=0; i < MAX_NUM_WORKER_SERVER; i++) 
+    for(int i=0; i < MAX_NUM_WORKER_SERVER; i++) 
 	{
 		thread_id = MALLOC(sizeof(int));
 		*thread_id = i;
@@ -302,7 +318,8 @@ int process_function(int *done, int evt, int fd)
     }
     else if (evt & EPOLLOUT)
     {
-		printf("evt is epollout");
+                print_sys_log ("evt is epollout \n" , INFO);
+		//printf("evt is epollout");
     }
 
    return SUCCESS;
@@ -405,15 +422,22 @@ void process_new_compute_req(Message *msg)
 
 void set_jclient_fd(Message *msg){
 	int fd = msg->client_id;	
+        char *tmp;
 	if (fd <= 0){
-		printf("ERROR: Invalid jclient_fd received\n");
+		//printf("ERROR: Invalid jclient_fd received\n");
+		snprintf(tmp ,100 ,"Invalid jclient_fd %d received: " , fd);
+                print_sys_log( tmp, ERROR);
 		return ;
 	}
 	if (jclient_fd != 0){
-		printf("Deleting existing jclient_fd and adding new\n");
+                snprintf(tmp, 100 ,"Deleting existing jclient_fd %d and adding new", fd);
+                print_sys_log (tmp, INFO);
+	//	printf("Deleting existing jclient_fd and adding new\n");
 		close(jclient_fd);
 	}
-	printf("Adding new job client. jclient_fd = %d\n", fd);
+        snprintf(tmp ,100, "\nAdding new job client. jclient_fd = %d\n", fd);
+         print_sys_log (tmp, INFO);
+	//printf("Adding new job client. jclient_fd = %d\n", fd);
 	jclient_fd = fd;
 }
 
@@ -430,8 +454,8 @@ void event_handler(Message *data)
 	        break;
 
         case CCLIENT_SERVER_GROUP_ID_EXIT: 
-            // handle_group_exit(data);
-			break;
+             handle_group_exit(data);
+		break;
         
         case CCLIENT_SERVER_COMPUTE_RESULT: 
             //collect_compute_result_and_process(data);
@@ -457,8 +481,10 @@ void *worker_thread_fun(void *thread_id)
     int mythread_id = *(int *)thread_id; 
 	free (thread_id);
     Message *data;
-
-    printf("\nWorker thread [%d] initialized!!\n", mythread_id);
+    char *tmp;
+    snprintf(tmp, 100, "\n Worker thread [%d] init done \n" , mythread_id);
+    print_sys_log(tmp , INFO);
+    //printf("\nWorker thread [%d] initialized!!\n", mythread_id);
     while(1)
     {
         pthread_mutex_lock(&mutex1);

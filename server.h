@@ -28,7 +28,7 @@ typedef struct client_groups {
 /*Function signatures*/
 void init_group_val() ;
 int handle_group_join(Message *);
-void remove_client_from_group(int c_id);
+int  remove_client_from_group(int c_id);
 void display_group_data() ;
 
 
