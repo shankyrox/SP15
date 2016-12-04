@@ -51,7 +51,7 @@ static int add_client_to_group(int c_id, int g_id)
 }     
 
 /*Remove the client from group*/     
-void remove_client_from_group(int c_id) 
+static int remove_client_from_group(int c_id) 
 {
     int g=0, i=0;
     int flag = 0 , tmp =0;
@@ -60,7 +60,7 @@ void remove_client_from_group(int c_id)
 	if (c_id == jclient_fd){
 		printf("job_client closed \n");
 		jclient_fd = 0;
-		return ;
+		return FAILURE;
 	}
 
     for(g=0; (g<MAX_GROUP) && (flag!=1); g++)
@@ -78,14 +78,14 @@ void remove_client_from_group(int c_id)
                 client_grps[g].num_of_client--;
                 flag = 1 ;
                 printf("\nClient %d removed successfuly \n", c_id);
-                return;
+                return SUCCESS;
             }
         }
     }
     if (flag == 0) 
     {
         printf("ERROR:: Client not found in any group \n");
-        return ;
+        return FAILURE;
     }
 }
 
@@ -124,4 +124,20 @@ int handle_group_join(Message *msg)
     display_group_data(); 
 	return SUCCESS;
 }
+
+int handle_group_exit(Message *msg)
+{
+      char *tmp;
+      snprintf(tmp, 1000,"\nClient %d to be removed from group %d",msg->client_id, msg->data[0]);
+      print_sys_log(tmp , INFO);
+      if(remove_client_from_group(msg->client_id , msg->data[0]) != SUCCESS)
+         {
+           print_sys_log("\nClient removal failed" , ERROR);
+           return FAILURE;
+         }
+     close (msg->client_id);
+     display_group_data();
+     return SUCCESS;
+}
+
 
