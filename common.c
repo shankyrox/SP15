@@ -101,9 +101,9 @@ static int parseStringStructToJson(json_t *obj, Message *msg){
 	}
 	json_object_set(obj, "data", temp_arr);
 	return SUCCESS;
-}*/
+}
 
-/*int parseStruct(char **str, Message *msg){
+int parseStruct(char **str, Message *msg){
 	json_t *obj = json_object();
 	switch(msg->event){
 		case SERVER_CCLIENT_CONNECTION_ACCEPTED : ;
@@ -122,21 +122,8 @@ static int parseStringStructToJson(json_t *obj, Message *msg){
 	*str = json_dumps(obj,0);
 	json_decref(obj);
 	return SUCCESS;
-}*/
-int parseStruct(char **str, Message *msg) {
-    char *str1 , *tmp_str;
-    str1 = (char *)malloc(sizeof(msg->event)+sizeof(msg->result)+(msg->client_id)+(msg->data_len)+(sizeof(int)*(msg->data_len)));
-    snprintf(str1 ,size(str1) , "%d %d %d %d ",msg->event , msg->result , msg->client_id , msg->data_len);
-    for (int i=0 ; i < msg->data_len ; i++) {
-        snprintf( tmp_str , sizeof(int)+1 ,"%d " , *((msg->data)+i));
-        strcat(str1, tmp_str);
-      }
-    printf("\n the string is %s ", str1);
-    str = &str1;
-    return 1;
 }
 
-/*
 static int parseJsonToStringStruct(json_t *obj, Message *msg){
 	msg->result = json_integer_value(json_object_get(obj, "result"));
 	msg->data_len = (unsigned int)json_integer_value(json_object_get(obj, "data_len"));
@@ -144,8 +131,7 @@ static int parseJsonToStringStruct(json_t *obj, Message *msg){
 	strcpy(msg->data, json_string_value(json_object_get(obj, "data")));
 	return SUCCESS;
 }
-*/
-/*
+
 static int parseJsonToIntStruct(json_t *obj, Message *msg){
 	int x = 0, i;
 	msg->result = json_integer_value(json_object_get(obj, "result"));
@@ -186,6 +172,55 @@ int parseJson(char *strMsg, Message *msg){
 }
 */
 
+int parseStruct(char **str, Message *msg) {
+    char *str1 , *tmp_str;
+    str1 = (char *)malloc(sizeof(msg->event)+sizeof(msg->result)+(msg->client_id)+(msg->data_len)+(sizeof(int)*(msg->data_len)));
+    snprintf(str1 ,size(str1) , "%d %d %d %d ",msg->event , msg->result , msg->client_id , msg->data_len);
+    for (int i=0 ; i < msg->data_len ; i++) {
+        snprintf( tmp_str , sizeof(int)+1 ,"%d " , *((msg->data)+i));
+        strcat(str1, tmp_str);
+      }
+    printf("\n the string is %s ", str1);
+    str = &str1;
+    return SUCCESS;
+}
+
+int parseJson(char *strMsg, Message *msg){
+
+        char *temp = strMsg;
+        char *token = NULL;
+        int i=0;
+
+        token = strtok(temp, " ");
+        if(token != NULL)
+           msg->event = atoi(token);
+
+        token = strtok (NULL, " ");
+        if(token != NULL)
+           msg->result = atoi(token);
+
+        token = strtok (NULL, " ");
+        if(token != NULL)
+           msg->client_id = atoi(token);
+
+        token = strtok (NULL, " ");
+        if(token != NULL)
+           msg->data_len = atoi(token);
+
+		msg->data = (int *)malloc(msg->data_len*sizeof(int));
+
+        for (i=0; i < msg->data_len; i++)
+        {
+            token = strtok(NULL, " ");
+            if(token != NULL)
+               msg->data[i] = atoi(token);
+            else
+               break;
+        }    
+
+        return SUCCESS;
+}
+
 int populate_and_send_data(int event, int *data, int datalen, int fd, int client_id)
 {
     Message msg= {0};
@@ -204,4 +239,18 @@ int populate_and_send_data(int event, int *data, int datalen, int fd, int client
         return -1;
     }
 	return SUCCESS;
+}
+
+void display_message(Message *msg){
+	printf("msg.event = %d\n"
+			"msg.result = %d\n"
+			"msg.client_id = %d\n"
+			"msg.data_len = %d\n",
+			msg->event, msg->result, msg->client_id, msg->data_len);
+	printf("msg->data = \n");
+	int i;
+	for (i = 0; i<msg->data_len; i++){
+		printf("%d ", msg->data[i]);
+	}
+	printf("\n");
 }
