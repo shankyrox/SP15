@@ -105,7 +105,7 @@ static int parseIntStructToJson(json_t *obj, Message *msg){
 
 int parseStruct(char **str, Message *msg){
 	json_t *obj = json_object();
-	switch(msg->event){
+	/*switch(msg->event){
 		case SERVER_CCLIENT_CONNECTION_ACCEPTED : ;
 		case SERVER_CCLIENT_GROUP_IDS_SUPPORTED : ;
 		case SERVER_CCLIENT_DATA_TO_COMPUTE : ;
@@ -118,7 +118,8 @@ int parseStruct(char **str, Message *msg){
 			parseIntStructToJson(obj, msg);
 			break;
 		default : return -1;
-	}
+	}*/
+	parseIntStructToJson(obj, msg);
 	*str = json_dumps(obj,0);
 	json_decref(obj);
 	return SUCCESS;
@@ -153,7 +154,7 @@ int parseJson(char *strMsg, Message *msg){
 	json_error_t err = {0};
 	json_t *obj = json_loads( strMsg, 0, &err);
 	msg->event = json_integer_value(json_object_get(obj, "event"));
-	switch(msg->event){
+	/*switch(msg->event){
 		case SERVER_CCLIENT_CONNECTION_ACCEPTED : 
 		case SERVER_CCLIENT_GROUP_IDS_SUPPORTED : 
 		case SERVER_CCLIENT_DATA_TO_COMPUTE : 
@@ -168,7 +169,8 @@ int parseJson(char *strMsg, Message *msg){
 		default : 
 			json_decref(obj);
 			return -1;
-	}
+	}*/
+	parseJsonToIntStruct(obj, msg);
 	json_decref(obj);
 	return SUCCESS;
 }

@@ -128,22 +128,25 @@ int handle_group_join(Message *msg)
 }
 
 void collate_results(Message *msg){
-	int data_len, gid, result, result_arr_size;
+	int data_len, gid, result, result_arr_size, client_fd;
 	data_len = msg->data_len;
 	if (data_len != 2){
 		printf("ERROR : Invalid compute result received from client\n");
 		return ;
 	}
+	
 	gid = msg->data[0];
 	if (gid < 0 || gid > MAX_GROUP){
 		printf("ERROR : Invalid group recvd from client. gid = %d\n", gid);
 		return ;
 	}
+	
 	result = msg->data[1];
 	if (client_grps[gid].active_clients==0){
 		printf("ERROR : No clients are active in group %d\n",gid);
 		return ; 
 	}
+
 	//acquire lock here
 	client_grps[gid].active_clients--;
 	result_arr_size = grp_results[gid].result_arr_size;
@@ -156,6 +159,13 @@ void collate_results(Message *msg){
 		}
 		else {
 		//send for computation again to same group with array passed	
+			client_grps[gid].active_clients++;
+			client_fd = client_grps[gid].client_id[0];
+			populate_and_send_data(SERVER_CCLIENT_DATA_TO_COMPUTE, 
+									grp_results[gid].result_arr, 
+									grp_results[gid].result_arr_size, 
+									client_fd, client_fd);
+			grp_results[gid].result_arr_size = 0;
 		}
 	}
 	//release lock here 

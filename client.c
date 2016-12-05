@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
-  while (1)
+	while (1)
     {
         int num_fd_ready =0, i=0, done =0;
 
@@ -205,8 +205,6 @@ int process_function(int *done, int evt, int fd)
 /* Client */
 void event_handler(Message *data)
 {
-    PRINT("\nevent_handler event = %d\n", data->event);
-    
     switch(data->event)
     {
         case SERVER_CCLIENT_GROUP_IDS_SUPPORTED: 
@@ -246,8 +244,6 @@ void *worker_thread_fun(void *thread_id)
         {
             data = (Message*)malloc(sizeof(Message));
             pop_head(&(list.head), data);  //use double pointer
-
-            PRINT("\nsize_list after pop = %d\n", size_list(list.head));
             event_handler(data);
             free(data);
         

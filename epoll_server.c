@@ -424,15 +424,15 @@ int divide_work(int *array, int data_num)
 
     for(i=0; i < num_clients_to_use; i++)
     {
-       if(end > data_num)
-          end = data_num;
+		if(end > data_num)
+		end = data_num;
 
-       divide_array_and_send(client_grps[g].client_id[i], start, end, array);
-     
-       start = end;
-       end = end + data_per_client;
+	    divide_array_and_send(client_grps[g].client_id[i], start, end, array);
+		client_grps[g].active_clients++;
+		start = end;
+		end = end + data_per_client;
     }
-    return SUCC;
+    return SUCCESS;
 }
 
 /*
@@ -533,7 +533,7 @@ void event_handler(Message *data)
 			break;
         
         case CCLIENT_SERVER_COMPUTE_RESULT: 
-            //collate_results(data);
+            collate_results(data);
         	break;
         
         case JCLIENT_SERVER_COMPUTE_MY_DATA:

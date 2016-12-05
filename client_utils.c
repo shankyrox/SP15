@@ -33,58 +33,60 @@ int select_group_join(Message *msg){
 	int grp_idx = selectGroup(nGroups);
 	grp_idx = grp_idx < 0 ? 0 : grp_idx; //To make sure index is not -ve
 	client_gid = msg->data[grp_idx];
-	// We will have to make client aware of the client id for future 
-	// purposes when we introduce heartbeat mechanism
+	client_gid = 0; //tmp hack to add to 0 group
 	populate_and_send_data(event_id, &client_gid, 1, sockfd, sockfd);
 	return SUCCESS;
 }
 
 //Returns the index of maximum element in the array
 int find_maximum(int *a, int n) {
-  int c, max, index;
-  if (n <=0) return -1;
- 
-  max = a[0];
-  index = 0;
- 
-  for (c = 1; c < n; c++) {
-    if (a[c] > max) {
-       index = c;
-       max = a[c];
-    }
-  }
- 
-  return index;
+	int c, max, index;
+	if (n <=0) return -1;
+
+	max = a[0];
+	
+	index = 0;
+
+	for (c = 1; c < n; c++) {
+		if (a[c] > max) {
+			index = c;
+			max = a[c];
+		}
+	}
+
+  return a[index];
 }
 
 //Returns the index of minimum element in the array
 int find_minimum(int *a, int n) {
-  int c, min, index;
-  if (n <=0) return -1;
- 
-  min = a[0];
-  index = 0;
- 
-  for (c = 1; c < n; c++) {
-    if (a[c] < min) {
-       index = c;
-       min = a[c];
-    }
-  }
- 
-  return index;
+	int c, min, index;
+	if (n <=0) return -1;
+
+	min = a[0];
+	index = 0;
+
+	for (c = 1; c < n; c++) {
+		if (a[c] < min) {
+			index = c;
+		 	min = a[c];
+		}
+	}
+
+  return a[index];
 }
 
 //Need to have a argument which specifies what is the job required to be done
 //Assuming that need to compute maximum
 int compute_data(Message *msg){
-	int *arr, size, arr_to_send[2];
+	int *arr, size, arr_to_send[2], result;
 	arr_to_send[0] = client_gid;
 	arr = msg->data;
 	size = msg->data_len;
 
 	//add case over here based on argument value, call function
-	arr_to_send[1] = find_maximum(arr, size);
+	result = find_maximum(arr, size);
+	arr_to_send[1] = result;
+	printf("maximum value found = %d\n", result);
 
 	//create a new msg for result and send to server
 	populate_and_send_data(CCLIENT_SERVER_COMPUTE_RESULT, arr_to_send, 2, sockfd, msg->client_id);
