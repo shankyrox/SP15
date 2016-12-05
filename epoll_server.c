@@ -12,8 +12,6 @@ int sfd, efd;
 int jclient_fd = 0;
 List list;
 
-Compute current_comp_req = {0};
-
 pthread_t worker[MAX_NUM_WORKER_SERVER];
 pthread_cond_t cond1;
 pthread_mutex_t mutex1;
@@ -281,23 +279,21 @@ int process_function(int *done, int evt, int fd)
 		}
 		buf[count] = '\0';
 		
+		display_group_data();
 		/*Deserialize the buf and put it into Message buffer */
 		Message msg_buff = {0};
 
 		parseJson(buf, &msg_buff);
 		msg_buff.client_id = fd;
-
 		pthread_mutex_lock(&mutex1);
-
 		push_tail(&list.head, &msg_buff);
 		
 		pthread_cond_broadcast(&cond1);
 
 		pthread_mutex_unlock(&mutex1);
 
-	  //  PRINT("\nsize_list = %d\n", size_list(list.head));
-
-		PRINT("\n Main thread : Rcvd data from fd = %d :: %s \n",fd, buf);
+		PRINT("\n MESSAGE RECEIVED : \n");
+		display_message(&msg_buff);
 		
     }
     else if (evt & EPOLLOUT)
@@ -311,49 +307,45 @@ int process_function(int *done, int evt, int fd)
 void divide_array_and_send(int cfd, int start,int end,int *array)
 {
     
-    int i, data[300];
+    int i, *data, data_size;
+	data_size = end-start;
+	data = MALLOC(data_size * sizeof (int));
     for(i =0; i<end; i++)
     {
         data[i] = array[start++];    
     }
 
-    populate_and_send_data(SERVER_CCLIENT_DATA_TO_COMPUTE, data, i, cfd, cfd);
+    populate_and_send_data(SERVER_CCLIENT_DATA_TO_COMPUTE, data, data_size, cfd, cfd);
 }
 
 int get_mcast_index()
 {
-
-
     int mcast_id = -1;
 
     for(mcast_id=0; mcast_id<MAX_GROUP; mcast_id++)
     {
-        
-        if(client_grps[mcast_id].num_of_client >= 2)
+        if(client_grps[mcast_id].num_of_client >= 1)
         {
-          
           return mcast_id;
-       }
+       	}
     }
     return -1;
 }
 
-
 int divide_work(int *array, int data_num)
 {
-    int num_clients = 0;
-    float ratio = 0;
-    int data_per_client = 0;
-    int num_clients_to_use = 0;
-    float a, b;
-    int g;
+    int g, i, data_per_client=0, num_clients_to_use = 0, num_clients=0;
+    float a, b, ratio = 0;
     unsigned char start, end;
     
-    g_id = get_mcast_index();
+    g = get_mcast_index();
+	if (g < 0){
+		printf ("ERROR : No available groups\n");
+		return FAILURE;
+	}
     num_clients = client_grps[g].num_of_client;
 
     a = data_num;
-
     b = num_clients;
     ratio = a/b;
 
@@ -361,6 +353,7 @@ int divide_work(int *array, int data_num)
     {
         /* Number of clients = Number of data items */
         num_clients_to_use = num_clients/4;
+		if(num_clients_to_use == 0) num_clients_to_use = 1;
         data_per_client = data_num/num_clients_to_use;
     }
     else if(ratio < 1)
@@ -422,6 +415,7 @@ int divide_work(int *array, int data_num)
         {
             num_clients_to_use = num_clients;
         }
+		if (num_clients_to_use == 0) num_clients_to_use++;
         data_per_client = data_num/num_clients_to_use;
     }
 
@@ -440,6 +434,7 @@ int divide_work(int *array, int data_num)
     }
     return SUCC;
 }
+
 /*
 int divide_work(int *array, int numentry)
 {
@@ -470,7 +465,6 @@ int divide_work(int *array, int numentry)
     else
         return -1;
 }
-*/
 
 void compute_the_result_and_send(Message *msg)
 {
@@ -489,6 +483,7 @@ void compute_the_result_and_send(Message *msg)
     //populate_and_send_data(SERVER_JCLIENT_FINAL_COMPUTE_RESULT, max, 1, msg->client_id, msg->client_id);
 }
 
+
 void process_new_compute_req(Message *msg)
 {
 
@@ -499,10 +494,15 @@ void process_new_compute_req(Message *msg)
     current_comp_req.result = 0;
     memcpy(&current_comp_req.data, msg->data, sizeof(int)*msg->data_len);
 
-   if(-1 == divide_work(current_comp_req.data, msg->data_len))
+   if(-1 == divide_work(msg->data, msg->data_len))
    {
-       compute_the_result_and_send(msg);
+       //compute_the_result_and_send(msg);
    }
+}
+*/
+
+void process_new_compute_req(Message *msg){
+	divide_work(msg->data, msg->data_len);
 }
 
 void set_jclient_fd(Message *msg){
@@ -567,12 +567,10 @@ void *worker_thread_fun(void *thread_id)
         while(size_list(list.head))
         {
             data = (Message*)malloc(sizeof(Message));
-            pop_head(&(list.head), data); //use double pointer here
-
-            PRINT("\nsize_list after pop = %d\n", size_list(list.head));
+            pop_head(&(list.head), data); 
+			printf("\n\n");
             event_handler(data);  
             free(data);
-        
         }
         pthread_mutex_unlock(&mutex1);
     }
