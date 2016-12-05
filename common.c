@@ -88,7 +88,7 @@ static int parseStringStructToJson(json_t *obj, Message *msg){
 */
 
 
-/*static int parseIntStructToJson(json_t *obj, Message *msg){
+static int parseIntStructToJson(json_t *obj, Message *msg){
 	int x = 0, i;
 	json_object_set(obj, "event", json_integer(msg->event));
 	json_object_set(obj, "result", json_integer(msg->result));
@@ -124,6 +124,7 @@ int parseStruct(char **str, Message *msg){
 	return SUCCESS;
 }
 
+/*
 static int parseJsonToStringStruct(json_t *obj, Message *msg){
 	msg->result = json_integer_value(json_object_get(obj, "result"));
 	msg->data_len = (unsigned int)json_integer_value(json_object_get(obj, "data_len"));
@@ -131,6 +132,7 @@ static int parseJsonToStringStruct(json_t *obj, Message *msg){
 	strcpy(msg->data, json_string_value(json_object_get(obj, "data")));
 	return SUCCESS;
 }
+*/
 
 static int parseJsonToIntStruct(json_t *obj, Message *msg){
 	int x = 0, i;
@@ -170,16 +172,18 @@ int parseJson(char *strMsg, Message *msg){
 	json_decref(obj);
 	return SUCCESS;
 }
-*/
 
+/*
 int parseStruct(char **str, Message *msg) {
     char *str1 , *tmp_str;
+	int i;
+	//Add size for spaces here
     str1 = (char *)malloc(sizeof(msg->event)+sizeof(msg->result)+(msg->client_id)+(msg->data_len)+(sizeof(int)*(msg->data_len)));
-    snprintf(str1 ,size(str1) , "%d %d %d %d ",msg->event , msg->result , msg->client_id , msg->data_len);
-    for (int i=0 ; i < msg->data_len ; i++) {
+    sprintf(str1,"%d %d %d %d ",msg->event , msg->result , msg->client_id , msg->data_len);
+    for (i=0 ; i < msg->data_len ; i++) {
         snprintf( tmp_str , sizeof(int)+1 ,"%d " , *((msg->data)+i));
         strcat(str1, tmp_str);
-      }
+    }
     printf("\n the string is %s ", str1);
     str = &str1;
     return SUCCESS;
@@ -220,6 +224,7 @@ int parseJson(char *strMsg, Message *msg){
 
         return SUCCESS;
 }
+*/
 
 int populate_and_send_data(int event, int *data, int datalen, int fd, int client_id)
 {
