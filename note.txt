@@ -4,3 +4,6 @@
 
 > There are known limitations in the server and client programs, which will be resolved later.
 
+The best way to avoid this problem is to make sure that whenever threads lock multiple mutexes, they do so in the same order. When locks are always taken in a prescribed order, deadlock should not occur. This technique is known as lock hierarchies: order the mutexes by logically assigning numbers to them.
+
+

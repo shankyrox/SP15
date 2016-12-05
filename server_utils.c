@@ -127,14 +127,14 @@ int handle_group_join(Message *msg)
 }
 
 void collate_results(Message *msg){
-	int data_len, gid, result;
+	int data_len, gid, result, result_arr_size;
 	data_len = msg->data_len;
 	if (data_len != 2){
 		printf("ERROR : Invalid compute result received from client\n");
 		return ;
 	}
 	gid = msg->data[0];
-	if (gid < 0 || gid >= MAX_GROUPS){
+	if (gid < 0 || gid > MAX_GROUP){
 		printf("ERROR : Invalid group recvd from client. gid = %d\n", gid);
 		return ;
 	}
@@ -145,7 +145,9 @@ void collate_results(Message *msg){
 	}
 	//acquire lock here
 	client_grps[gid].active_clients--;
-	grp_results[gid].result_arr[result_arr_size++] = result;
+	result_arr_size = grp_results[gid].result_arr_size;
+	grp_results[gid].result_arr[result_arr_size] = result;
+	grp_results[gid].result_arr_size++;
 	if (client_grps[gid].active_clients == 0){
 		if (grp_results[gid].result_arr_size == 1){
 			printf("Computation over. Sending data to job_client\n");
@@ -153,6 +155,7 @@ void collate_results(Message *msg){
 		}
 		else {
 		//send for computation again to same group with array passed	
+		}
 	}
 	//release lock here 
 }
