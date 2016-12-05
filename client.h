@@ -15,7 +15,6 @@
 #define PORT "5009" // the port client will be connecting to 
 
  
-#define MAX_GROUPS 100
 #define DELAY 2
 #define MAX_NUM_WORKER_CLIENT 2
 

@@ -10,12 +10,14 @@
 #include <arpa/inet.h>
 #include "common.h"
 
-int client_id = 0xffff, efd, sockfd;
+int efd, sockfd;
 struct epoll_event event;
+pthread_t worker;
 
 int process_function(int *done, int event, int fd);
 int submit_job();
 void event_handler(Message *);
+void *worker_thread_fun();
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -46,6 +48,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
+	
+	/* Create thread for accepting job from user*/
+	pthread_create(&worker, NULL, worker_thread_fun, NULL);
 
     // loop through all the results and connect to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
@@ -123,16 +128,9 @@ int main(int argc, char *argv[])
 				if(done)
                    exit(EXIT_FAILURE); 
         }
-		//wait for user to submit job
-		while(1) {
-			if(submit_job() == SUCCESS){
-				break;
-			}
-		}
     }
 
     close(sockfd);
-
     return 0;
 }
 
@@ -233,3 +231,9 @@ int submit_job(){
 	return SUCCESS; // add error handling code to return failure 
 }
 
+void *worker_thread_fun(){
+//wait for user to submit job
+	while(1) {
+		submit_job();
+	}
+}

@@ -41,7 +41,7 @@ common.o: common.c common.h
 	$(CC) $(CFLAGS) -c common.c 
 
 job_client: job_client.o common.o
-	$(CC) $(CFLAGS) -o job_client job_client.o common.o
+	$(CC) $(CFLAGS) -o job_client job_client.o common.o -lpthread
 
 job_client.o: job_client.c common.h
 	$(CC) $(CFLAGS) -c job_client.c
