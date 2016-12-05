@@ -133,6 +133,7 @@ static int parseJsonToStringStruct(json_t *obj, Message *msg){
 }
 */
 
+/*
 static int parseJsonToIntStruct(json_t *obj, Message *msg){
 	int x = 0, i;
 	msg->result = json_integer_value(json_object_get(obj, "result"));
@@ -147,8 +148,44 @@ static int parseJsonToIntStruct(json_t *obj, Message *msg){
 	}
 	return SUCCESS;
 }
+*/
 
 int parseJson(char *strMsg, Message *msg){
+
+        char *temp = strMsg;
+        char *token = NULL;
+        int i=0;
+
+        token = strtok(temp, " ");
+        if(token != NULL)
+           msg->event = atoi(token);
+
+        token = strtok (NULL, " ");
+        if(token != NULL)
+           msg->result = atoi(token);
+
+        token = strtok (NULL, " ");
+        if(token != NULL)
+           msg->client_id = atoi(token);
+
+        token = strtok (NULL, " ");
+        if(token != NULL)
+           msg->data_len = atoi(token);
+
+	msg->data = (int *)malloc(msg->data_len*sizeof(int));
+
+        for (i=0; i < msg->data_len; i++)
+        {
+            token = strtok(NULL, " ");
+            if(token != NULL)
+               msg->data[i] = atoi(token);
+            else
+               break;
+        }    
+
+        return SUCCESS;
+
+        /*
 	json_error_t err = {0};
 	json_t *obj = json_loads( strMsg, 0, &err);
 	msg->event = json_integer_value(json_object_get(obj, "event"));
@@ -170,6 +207,8 @@ int parseJson(char *strMsg, Message *msg){
 	}
 	json_decref(obj);
 	return SUCCESS;
+        */
+
 }
 
 
