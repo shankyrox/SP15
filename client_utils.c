@@ -2,6 +2,7 @@
 #include "client.h"
 
 extern int sockfd; //server fd to send data
+extern int client_gid;
 
 static int selectGroup(int nGroups)
 {
@@ -31,10 +32,10 @@ int select_group_join(Message *msg){
 	int nGroups = msg->data_len;
 	int grp_idx = selectGroup(nGroups);
 	grp_idx = grp_idx < 0 ? 0 : grp_idx; //To make sure index is not -ve
-	int grp_to_join = msg->data[grp_idx];
+	client_gid = msg->data[grp_idx];
 	// We will have to make client aware of the client id for future 
 	// purposes when we introduce heartbeat mechanism
-	populate_and_send_data(event_id, &grp_to_join, 1, sockfd, sockfd);
+	populate_and_send_data(event_id, &client_gid, 1, sockfd, sockfd);
 	return SUCCESS;
 }
 
@@ -74,15 +75,18 @@ int find_minimum(int *a, int n) {
   return index;
 }
 
-//Need to have a field which specifies what is the job required to be done
+//Need to have a argument which specifies what is the job required to be done
 //Assuming that need to compute maximum
 int compute_data(Message *msg){
-	int *arr, size, result;
+	int *arr, size, arr_to_send[2];
+	arr_to_send[0] = client_gid;
 	arr = msg->data;
 	size = msg->data_len;
-	result = find_maximum(arr, size);
+
+	//add case over here based on argument value, call function
+	arr_to_send[1] = find_maximum(arr, size);
 
 	//create a new msg for result and send to server
-	populate_and_send_data(CCLIENT_SERVER_COMPUTE_RESULT, &result, 1, sockfd, msg->client_id);
+	populate_and_send_data(CCLIENT_SERVER_COMPUTE_RESULT, arr_to_send, 2, sockfd, msg->client_id);
 	return SUCCESS;
 }

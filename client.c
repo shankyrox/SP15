@@ -10,6 +10,7 @@ pthread_t worker[MAX_NUM_WORKER_CLIENT];
 pthread_cond_t cond1;
 pthread_mutex_t mutex1;
 int client_id = 0xffff;
+int client_gid = -1;
 
 int efd, sockfd;
 
@@ -210,22 +211,18 @@ void event_handler(Message *data)
     {
         case SERVER_CCLIENT_GROUP_IDS_SUPPORTED: 
             select_group_join(data);
-        break;
+        	break;
 
         case SERVER_CCLIENT_CONNECTION_ACCEPTED: 
-           // handle_group_exit(data);
-        break;
+            // handle_group_exit(data);
+			break;
         
         case SERVER_CCLIENT_DATA_TO_COMPUTE: 
             compute_data(data);
-        break;
+        	break;
         
-        case SERVER_JCLIENT_FINAL_COMPUTE_RESULT:
-           // process_final_compute_result(data);
-        break;
         default : 
-             PRINT("\nNot a valid Event %d\n", data->event);
-        break;
+    	    PRINT("\nNot a valid client Event %d\n", data->event);
  	}
 }
 
