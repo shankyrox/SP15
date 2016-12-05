@@ -339,6 +339,108 @@ int get_mcast_index()
 }
 
 
+int divide_work(int *array, int data_num)
+{
+    int num_clients = 0;
+    float ratio = 0;
+    int data_per_client = 0;
+    int num_clients_to_use = 0;
+    float a, b;
+    int g;
+    unsigned char start, end;
+    
+    g_id = get_mcast_index();
+    num_clients = client_grps[g].num_of_client;
+
+    a = data_num;
+
+    b = num_clients;
+    ratio = a/b;
+
+    if(ratio == 1)
+    {
+        /* Number of clients = Number of data items */
+        num_clients_to_use = num_clients/4;
+        data_per_client = data_num/num_clients_to_use;
+    }
+    else if(ratio < 1)
+    {
+        if (data_num <= 10) {
+        /* Number of clients > Number of data items */
+        if((num_clients - data_num) >= data_num)
+        {
+            num_clients_to_use = (num_clients-data_num)/2;
+        }
+        else
+        {
+            num_clients_to_use = num_clients/2;
+        }
+        data_per_client = data_num/num_clients_to_use;
+      }
+      else if (data_num <= 100){
+        if (ratio <= 0.9 && ratio > 0.5)
+        { 
+            num_clients_to_use = (data_num/3);
+        }
+        else
+        {
+           num_clients_to_use = (data_num/5);
+        }       
+        data_per_client = data_num/num_clients_to_use;
+      }
+      else if (data_num <= 1000) {
+        if (ratio <= 0.9 && ratio > 0.5)
+        { 
+            num_clients_to_use = (data_num/30);
+        }
+        else
+        {
+           num_clients_to_use = (data_num/50);
+        }       
+        data_per_client = data_num/num_clients_to_use;
+      }
+      else if (data_num <= 10000) {
+        if (ratio <= 0.9 && ratio > 0.5)
+        { 
+            num_clients_to_use = (data_num/300);
+        }
+        else
+        {
+           num_clients_to_use = (data_num/500);
+        }       
+        data_per_client = data_num/num_clients_to_use;
+      }
+    }
+    else
+    {
+        /* Number of clients < Number of data items */
+        if((data_num - num_clients) < num_clients)
+        {
+            num_clients_to_use = num_clients/2; 
+        }
+        else
+        {
+            num_clients_to_use = num_clients;
+        }
+        data_per_client = data_num/num_clients_to_use;
+    }
+
+    start = 0;
+    end  = data_per_client;
+
+    for(i=0; i < num_clients_to_use; i++)
+    {
+       if(end > data_num)
+          end = data_num;
+
+       divide_array_and_send(client_grps[g].client_id[i], start, end, array);
+     
+       start = end;
+       end = end + data_per_client;
+    }
+    return SUCC;
+}
+/*
 int divide_work(int *array, int numentry)
 {
 	int i, g, div;
@@ -368,7 +470,7 @@ int divide_work(int *array, int numentry)
     else
         return -1;
 }
-
+*/
 
 void compute_the_result_and_send(Message *msg)
 {
