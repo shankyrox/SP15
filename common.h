@@ -17,7 +17,6 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <pthread.h>
-#include <jansson.h>
 
 /*Common structures and events*/
 #define TRUE 1

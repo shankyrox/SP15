@@ -15,7 +15,7 @@ char *file = "sys_log";
 FILE *fptr;
 
 char* get_curr_time (void);
-void create_log_file (char *file);
+void create_log_file (char *);
 void delete_log_file (void);
 void write_to_logfile(char *);
 void print_func_stack(void);

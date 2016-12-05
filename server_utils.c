@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "server.h"
 #include "common.h"
+#include "debug.h"
 
 extern client_group client_grps[MAX_GROUP];
 extern int jclient_fd;
@@ -109,7 +110,7 @@ void display_group_data()
     printf("\n\nServer: Total number of clients active at the moment = %d \n", count);
 }
 
-int handle_group_join(Message *msg)
+static int handle_group_join(Message *msg)
 {
 
 	PRINT("\nClient wanted to joing group : %d\n", msg->data[0]);
@@ -130,7 +131,7 @@ int handle_group_exit(Message *msg)
       char *tmp;
       snprintf(tmp, 1000,"\nClient %d to be removed from group %d",msg->client_id, msg->data[0]);
       print_sys_log(tmp , INFO);
-      if(remove_client_from_group(msg->client_id , msg->data[0]) != SUCCESS)
+      if(remove_client_from_group(msg->client_id) != SUCCESS)
          {
            print_sys_log("\nClient removal failed" , ERROR);
            return FAILURE;

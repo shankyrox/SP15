@@ -16,7 +16,7 @@ char* get_curr_time ()
     return(asctime(timeinfo));
 }
 
-void create_log_file (file) 
+void create_log_file (char *file) 
 {
    /*gets created at the run time if the flag is mentioned
     uses current working dir to create the files */
@@ -52,13 +52,13 @@ void print_func_stack() {
    void *arr[10];
    size_t size, i;
    char **fname;
-   char *tmp_str;
-   strcpy(tmp_str , "\nTraceback:");
+   char *tmp_str = malloc(1000);
    size = backtrace(arr,10);
    fname = backtrace_symbols(arr,size);
    for (i=0; i<size ; i++ ) {
        snprintf(tmp_str , 1000 ,fname[i]);
      }    
+   strcat("\nTraceback:",tmp_str);
    printf("%s", tmp_str);
    if (to_file) {
      write_to_logfile(tmp_str);
@@ -73,7 +73,7 @@ void kill_the_proc() {
 
 void print_sys_log(char *msg, log_level var ) 
 {
-   char *tmp_str;
+   char *tmp_str = malloc(1000);
    int pid=0; // get the pid later
    //check if msg contains all fields necessary later
    if (!msg) {
@@ -82,34 +82,40 @@ void print_sys_log(char *msg, log_level var )
      }
  
   //form the log string
-  snprintf(tmp_str, msg_size,"%s::%s:%s", get_curr_time() , var ,msg);
+  snprintf(tmp_str, msg_size,"%s::%u:%s", get_curr_time() , var ,msg);
   if (to_file) {
      write_to_logfile(tmp_str);
     }
   switch (var) {
      case INFO:
          printf("\n%s",tmp_str); 
+         break;
      case WARNING:
          printf("\n%s", tmp_str);
+         break;
          //check if # of warning before calling err is required , later
      case ERROR:
          printf("\n%s", tmp_str);
          printf("\nTraceback:");
          (void) print_func_stack();
+         break;
      case FATAL:
          printf("\n%s", tmp_str);
          printf("\nTraceback:");
          (void) print_func_stack();
+         break;
  //        (void) kill_the_proc();
      case DEBUG:
          print_dbg_log(msg);
+         break;
    }
-
+  free(tmp_str);
+  return;
 }
 
 void print_dbg_log (char *msg) 
 {
-   char *tmp_str; 
+   char *tmp_str= malloc(1000); 
    if (!msg) {
       printf("\n NULL string returned for log msg \n");
       return;
@@ -121,6 +127,8 @@ void print_dbg_log (char *msg)
     }
    printf("\n%s",tmp_str);
   }
+  free(tmp_str);
+return;
 
  }
 

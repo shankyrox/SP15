@@ -125,8 +125,9 @@ static int parseStringStructToJson(json_t *obj, Message *msg){
 }*/
 int parseStruct(char **str, Message *msg) {
     char *str1 , *tmp_str;
+    int size = sizeof(Message);
     str1 = (char *)malloc(sizeof(msg->event)+sizeof(msg->result)+(msg->client_id)+(msg->data_len)+(sizeof(int)*(msg->data_len)));
-    snprintf(str1 ,size(str1) , "%d %d %d %d ",msg->event , msg->result , msg->client_id , msg->data_len);
+    snprintf(str1 ,sizeof(str1) , "%d %d %d %d ",msg->event , msg->result , msg->client_id , msg->data_len);
     for (int i=0 ; i < msg->data_len ; i++) {
         snprintf( tmp_str , sizeof(int)+1 ,"%d " , *((msg->data)+i));
         strcat(str1, tmp_str);
@@ -186,6 +187,41 @@ int parseJson(char *strMsg, Message *msg){
 }
 */
 
+int parseJson(char *strMsg, Message *msg){
+
+        char *temp = strMsg;
+        char *token = NULL;
+        int i=0;
+
+        token = strtok(temp, " ");
+        if(token != NULL)
+           msg->event = atoi(token);
+
+        token = strtok (NULL, " ");
+        if(token != NULL)
+           msg->result = atoi(token);
+
+        token = strtok (NULL, " ");
+        if(token != NULL)
+           msg->client_id = atoi(token);
+
+        token = strtok (NULL, " ");
+        if(token != NULL)
+           msg->data_len = atoi(token);
+
+	msg->data = (int *)malloc(msg->data_len*sizeof(int));
+
+        for (i=0; i < msg->data_len; i++)
+        {
+            token = strtok(NULL, " ");
+            if(token != NULL)
+               msg->data[i] = atoi(token);
+            else
+               break;
+        }    
+
+        return SUCCESS;
+}
 int populate_and_send_data(int event, int *data, int datalen, int fd, int client_id)
 {
     Message msg= {0};
