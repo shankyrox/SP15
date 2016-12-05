@@ -304,17 +304,15 @@ int process_function(int *done, int evt, int fd)
    return SUCCESS;
 }
 
-void divide_array_and_send(int cfd, int start,int end,int *array)
+void divide_array_and_send(int cfd, int start, int end, int *array)
 {
-    
     int i, *data, data_size;
 	data_size = end-start;
 	data = MALLOC(data_size * sizeof (int));
-    for(i =0; i<end; i++)
+    for(i =0; i<data_size; i++)
     {
         data[i] = array[start++];    
     }
-
     populate_and_send_data(SERVER_CCLIENT_DATA_TO_COMPUTE, data, data_size, cfd, cfd);
 }
 
@@ -360,15 +358,15 @@ int divide_work(int *array, int data_num)
     {
         if (data_num <= 10) {
         /* Number of clients > Number of data items */
-        if((num_clients - data_num) >= data_num)
-        {
-            num_clients_to_use = (num_clients-data_num)/2;
-        }
-        else
-        {
-            num_clients_to_use = num_clients/2;
-        }
-        data_per_client = data_num/num_clients_to_use;
+			if((num_clients - data_num) >= data_num)
+			{
+				num_clients_to_use = (num_clients-data_num)/2;
+			}
+			else
+			{
+				num_clients_to_use = num_clients/2;
+			}
+			data_per_client = data_num/num_clients_to_use;
       }
       else if (data_num <= 100){
         if (ratio <= 0.9 && ratio > 0.5)

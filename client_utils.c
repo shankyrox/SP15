@@ -44,7 +44,6 @@ int find_maximum(int *a, int n) {
 	if (n <=0) return -1;
 
 	max = a[0];
-	
 	index = 0;
 
 	for (c = 1; c < n; c++) {
@@ -53,7 +52,6 @@ int find_maximum(int *a, int n) {
 			max = a[c];
 		}
 	}
-
   return a[index];
 }
 
@@ -71,7 +69,6 @@ int find_minimum(int *a, int n) {
 		 	min = a[c];
 		}
 	}
-
   return a[index];
 }
 

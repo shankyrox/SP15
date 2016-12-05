@@ -55,7 +55,7 @@ typedef enum events
 	//CCLIENT = compute client, JCLIENT = job client
     SERVER_CCLIENT_GROUP_IDS_SUPPORTED =0,  
     SERVER_CCLIENT_CONNECTION_ACCEPTED =1,  // Never used so far
-    SERVER_CCLIENT_DATA_TO_COMPUTE =2,      
+    SERVER_CCLIENT_DATA_TO_COMPUTE = 2,      
     SERVER_JCLIENT_FINAL_COMPUTE_RESULT =3, 
     CCLIENT_SERVER_GROUP_ID_TO_JOIN =4, 
     CCLIENT_SERVER_GROUP_ID_EXIT =5,    
@@ -89,10 +89,12 @@ typedef struct list
 
 void pop_head(Node ** head, Message *arr);
 void push_tail(Node** head, Message *new_data);
+int size_list(Node *head);
 
 int populate_and_send_data(int event, int *data, int datalen, int fd, int client_id);
+void collate_results(Message *);
+void display_message(Message *);
 
-int size_list(Node *head);
 
 void dserializeTask(unsigned char* msg, Message *t);
 void serializeTask(unsigned char* msg, const Message *t);
@@ -100,5 +102,4 @@ void serializeTask(unsigned char* msg, const Message *t);
 int parseStruct(char **, Message *);
 int parseJson(char *, Message *);
 
-void display_message(Message *);
 #endif
