@@ -1,5 +1,5 @@
 /*
-** client.c 
+** job_client.c 
 */
 #include <stdio.h>
 #include <unistd.h>

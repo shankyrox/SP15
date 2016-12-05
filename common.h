@@ -87,16 +87,6 @@ typedef struct list
     int count;
 }List;
 
-typedef struct compute_req
-{
-    int req_id;
-    int client_id;
-    int status;
-    int result;
-    int *data;
-}Compute;
-
-
 void pop_head(Node ** head, Message *arr);
 void push_tail(Node** head, Message *new_data);
 
@@ -109,4 +99,6 @@ void serializeTask(unsigned char* msg, const Message *t);
 
 int parseStruct(char **, Message *);
 int parseJson(char *, Message *);
+
+void display_message(Message *);
 #endif

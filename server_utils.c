@@ -102,9 +102,10 @@ void display_group_data()
         {
             printf(" %d ",client_grps[i].client_id[j]);
             count++;
-            if(j%50==0)
+            if(j%50==0 && j!=0)
                 printf("\n");
         }
+		printf("no.of_clients = %d", client_grps[i].num_of_client);
     }
          
     printf("\n\nServer: Total number of clients active at the moment = %d \n", count);
