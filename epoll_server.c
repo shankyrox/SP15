@@ -352,6 +352,8 @@ int divide_work(int *array, int data_num)
     g_id = get_mcast_index();
     num_clients = client_grps[g].num_of_client;
 
+    a = data_num;
+
     b = num_clients;
     ratio = a/b;
 
