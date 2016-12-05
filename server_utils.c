@@ -18,6 +18,7 @@ void init_group_val()
         {
             client_grps[i].client_id[j]= 0xffff;
         }
+		client_grps[i].active_clients = 0;
     }
     printf("\nGroup structure init done!\n");
 }
@@ -48,7 +49,7 @@ static int add_client_to_group(int c_id, int g_id)
     }
 
     return SUCCESS;
-}     
+}
 
 /*Remove the client from group*/     
 void remove_client_from_group(int c_id) 
@@ -101,7 +102,7 @@ void display_group_data()
         {
             printf(" %d ",client_grps[i].client_id[j]);
             count++;
-            if(j==50)
+            if(j%50==0)
                 printf("\n");
         }
     }
@@ -123,5 +124,36 @@ int handle_group_join(Message *msg)
     //display the full group data
     display_group_data(); 
 	return SUCCESS;
+}
+
+void collate_results(Message *msg){
+	int data_len, gid, result;
+	data_len = msg->data_len;
+	if (data_len != 2){
+		printf("ERROR : Invalid compute result received from client\n");
+		return ;
+	}
+	gid = msg->data[0];
+	if (gid < 0 || gid >= MAX_GROUPS){
+		printf("ERROR : Invalid group recvd from client. gid = %d\n", gid);
+		return ;
+	}
+	result = msg->data[1];
+	if (client_grps[gid].active_clients==0){
+		printf("ERROR : No clients are active in group %d\n",gid);
+		return ; 
+	}
+	//acquire lock here
+	client_grps[gid].active_clients--;
+	grp_results[gid].result_arr[result_arr_size++] = result;
+	if (client_grps[gid].active_clients == 0){
+		if (grp_results[gid].result_arr_size == 1){
+			printf("Computation over. Sending data to job_client\n");
+			populate_and_send_data(SERVER_JCLIENT_FINAL_COMPUTE_RESULT, grp_results[gid].result_arr, 1, jclient_fd, jclient_fd);
+		}
+		else {
+		//send for computation again to same group with array passed	
+	}
+	//release lock here 
 }
 

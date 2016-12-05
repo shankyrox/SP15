@@ -417,12 +417,9 @@ void set_jclient_fd(Message *msg){
 	jclient_fd = fd;
 }
 
-/* Client */
+/* Server event handler */
 void event_handler(Message *data)
 {
-    //Verify the data here
-    PRINT("\nevent_handler event = %d\n", data->event);
-    
     switch(data->event)
     {
         case CCLIENT_SERVER_GROUP_ID_TO_JOIN : 
@@ -434,8 +431,8 @@ void event_handler(Message *data)
 			break;
         
         case CCLIENT_SERVER_COMPUTE_RESULT: 
-            //collect_compute_result_and_process(data);
-        break;
+            //collate_results(data);
+        	break;
         
         case JCLIENT_SERVER_COMPUTE_MY_DATA:
             process_new_compute_req(data);
@@ -447,9 +444,7 @@ void event_handler(Message *data)
 
         default : 
              PRINT("\nNot a valid Event %d\n", data->event);
-        break;
- }
-
+ 	}
 }
 
 void *worker_thread_fun(void *thread_id)

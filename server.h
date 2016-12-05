@@ -23,7 +23,13 @@ typedef struct client_groups {
     int grp_id;
     unsigned int num_of_client;
     int client_id[MAX_CLIENTS_PER_GROUP];
+	unsigned int active_clients;
 }client_group;
+
+struct {
+	int result_arr_size;
+	int result_arr[MAX_CLIENTS_PER_GROUP];
+}grp_results[MAX_GROUP];
 
 /*Function signatures*/
 void init_group_val() ;
